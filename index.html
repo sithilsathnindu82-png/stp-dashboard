@@ -7,137 +7,1448 @@
 
 <style>
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
+html, body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Scroll bars අයින් කරයි */
+  touch-action: manipulation; /* Double-tap zoom නවත්වයි */
 }
 
-.card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    max-width: 500px;
-    width: 100%;
-    box-sizing: border-box;
+/* Chart සහ Popups screen එකට auto fit කිරීමට */
+canvas, .popup, .modal {
+  max-width: 90vw !important;
+  max-height: 80vh !important;
 }
 
-.form-group {
-    margin-bottom: 15px;
+
+ :root{
+    --theme-bg:#080b14;
+    --theme-card:#131a2a;
+    --theme-input:#0d1422;
+    --theme-border:#29334d;
+    --theme-text:#f5f7ff;
+    --theme-muted:#8991a6;
+    --theme-accent:#5b5de6;
+    --theme-accent2:#7357ff;
+    --theme-success:#20c997;
+    --theme-danger:#ff5268;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
 
-input, select, button {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    margin-top: 5px;
+body{
+    background:#000;
+    color:white;
+    height:100vh;
+    overflow:hidden;
 }
 
-button {
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
+/* =========================
+   CLICK STARS
+========================= */
+
+.click-star{
+    position:fixed;
+    pointer-events:none;
+    z-index:9999;
+    font-size:14px;
+    color:white;
+    animation:starBurst 700ms ease-out forwards;
 }
 
-button:hover {
-    background-color: #2563eb;
+@keyframes starBurst{
+    0%{
+        opacity:1;
+        transform:translate(0,0) scale(1);
+    }
+
+    100%{
+        opacity:0;
+        transform:
+            translate(var(--x),var(--y))
+            scale(0);
+    }
 }
 
-button.selected {
-    background-color: #10b981;
+/* =========================
+   SPLASH
+========================= */
+
+#splash{
+    position:fixed;
+    inset:0;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:10;
 }
 
-.button-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 10px;
+.s-logo{
+    font-size:200px;
+    font-weight:80;
+    opacity:0;
+    transform:scale(.7);
+    animation:logoIn 1.8s cubic-bezier(.16,1,.3,1) forwards;
 }
 
-.days-grid {
-    display: flex;
-    justify-content: space-between;
+.powered{
+    margin-top:10px;
+    font-size:13px;
+    letter-spacing:4px;
+    color:#aaa;
+    opacity:0;
+    animation:poweredIn 1s ease 1s forwards;
 }
 
-.day {
-    padding: 10px;
-    border-radius: 6px;
-    background: #e5e7eb;
-    text-align: center;
-    cursor: pointer;
-    flex: 1;
-    margin: 0 2px;
+@keyframes logoIn{
+    from{
+        opacity:0;
+        transform:scale(.7);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
 }
 
-.day.today {
-    background: #3b82f6;
-    color: white;
-    font-weight: bold;
+@keyframes poweredIn{
+    from{
+        opacity:0;
+        transform:translateY(15px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
 }
 
-.task-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+/* =========================
+   SETUP
+========================= */
+
+#setup{
+    display:none;
+    height:100vh;
+    justify-content:center;
+    align-items:center;
+    padding:25px;
 }
 
-.task-check {
-    width: 20px;
-    height: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+.setup-box{
+    width:100%;
+    max-width:520px;
 }
 
-.task-check.completed {
-    background: #10b981;
-    color: white;
-    border-color: #10b981;
+.setup-box h1{
+    font-size:35px;
+    margin-bottom:8px;
 }
 
-.task-text.completed {
-    text-decoration: line-through;
-    color: #888;
+.setup-box p{
+    color:#888;
+    margin-bottom:25px;
 }
 
-.task-delete {
-    width: auto;
-    background: transparent;
-    color: #ef4444;
-    padding: 0 5px;
+.input-group{
+    margin-bottom:18px;
 }
 
-.modal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.input-group label{
+    display:block;
+    margin-bottom:7px;
+    font-size:14px;
+    color:#bbb;
 }
-  
-    </style>
+
+.input-group input,
+.input-group select{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:1px solid #333;
+    background:#111;
+    color:white;
+    outline:none;
+    font-size:15px;
+}
+
+.input-group select option{
+    background:#111;
+    color:white;
+}
+
+.input-group input:focus,
+.input-group select:focus{
+    border-color:#777;
+}
+
+.continue-btn{
+    width:100%;
+    padding:15px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:white;
+    color:black;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.continue-btn:hover{
+    background:#ddd;
+}
+
+/* =========================
+   STREAM OPTIONS
+========================= */
+
+.stream-options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.stream-options button,
+#subjectOptions button{
+    border:1px solid #29334d;
+    border-radius:12px;
+    padding:14px;
+    background:#131a2a;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
+
+.stream-options button:hover,
+#subjectOptions button:hover{
+    background:#263451;
+    transform:translateY(-2px);
+}
+
+#subjectOptions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    max-height:390px;
+    overflow-y:auto;
+    padding-right:5px;
+}
+
+#subjectOptions button.selected{
+    background:#5b5de6;
+    border-color:#7476ff;
+    box-shadow:0 0 15px rgba(91,93,230,.3);
+}
+
+#subjectOptions::-webkit-scrollbar{
+    width:5px;
+}
+
+#subjectOptions::-webkit-scrollbar-thumb{
+    background:#29334d;
+    border-radius:10px;
+}
+
+.back-btn{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:1px solid #29334d;
+    border-radius:10px;
+    background:transparent;
+    color:#8991a6;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.back-btn:hover{
+    background:#1b2438;
+    color:white;
+}
+
+/* =========================
+   HELLO
+========================= */
+
+#hello{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#000;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:20;
+}
+
+.hello-small{
+    font-size:20px;
+    color:#999;
+    opacity:0;
+    animation:helloSmall 1s ease forwards;
+}
+
+.user-name{
+    margin-top:8px;
+    font-size:55px;
+    font-weight:800;
+    opacity:0;
+    transform:translateY(30px);
+    animation:nameIn 1s ease .5s forwards;
+}
+
+@keyframes helloSmall{
+    from{
+        opacity:0;
+        transform:translateY(15px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@keyframes nameIn{
+    from{
+        opacity:0;
+        transform:translateY(30px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+#dashboard{
+    display:none;
+    min-height:100vh;
+    height:100vh;
+    padding:30px;
+    background:#080b14;
+    color:#f5f7ff;
+    overflow-y:auto;
+}
+
+.dashboard-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:28px;
+}
+
+.dashboard-header h1{
+    font-size:30px;
+    margin-bottom:5px;
+}
+
+.dashboard-header p{
+    color:#8991a6;
+}
+
+.greeting{
+    background:#171d2e;
+    border:1px solid #29334d;
+    padding:12px 22px;
+    border-radius:30px;
+    font-weight:bold;
+}
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:
+        145px
+        minmax(280px,1.3fr)
+        minmax(300px,1fr)
+        minmax(300px,1.1fr);
+    gap:18px;
+    align-items:stretch;
+}
+
+.card{
+    background:#131a2a;
+    border:1px solid #222c43;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+}
+
+.card h2{
+    font-size:19px;
+    margin-bottom:18px;
+}
+
+.timer-column{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    height:100%;
+}
+
+.timer-column>.card{
+    flex:1;
+}
+
+.week-card,
+.todo-card,
+.distribution-card,
+.timer-column{
+    height:100%;
+}
+
+/* =========================
+   WEEK
+========================= */
+
+.week-days{
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
+
+.day{
+    height:58px;
+    border:none;
+    border-radius:100px;
+    background:#1b2438;
+    color:#8991a6;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.day:hover{
+    transform:scale(1.04);
+    background:#26324c;
+}
+
+.day.today{
+    background:#5b5de6;
+    color:white;
+    box-shadow:0 0 20px rgba(91,93,230,.4);
+}
+
+.week-number{
+    margin-top:14px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,.08);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    font-size:12px;
+    letter-spacing:1.5px;
+    color:#8d96aa;
+}
+
+.week-number strong{
+    font-size:16px;
+    color:white;
+    letter-spacing:1px;
+}
+
+/* =========================
+   TODO
+========================= */
+
+.todo-input{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.todo-input input,
+.todo-input select,
+.custom-inputs input{
+    background:#0d1422;
+    color:white;
+    border:1px solid #29334d;
+    border-radius:8px;
+    padding:11px;
+    outline:none;
+}
+
+.todo-input select option{
+    background:#0d1422;
+}
+
+.todo-input button,
+.custom-inputs button{
+    background:#5b5de6;
+    color:white;
+    border:none;
+    padding:11px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.task-item{
+    margin-top:10px;
+    padding:12px;
+    background:#0d1422;
+    border:1px solid #222c43;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.task-check{
+    width:25px;
+    height:25px;
+    border:2px solid #5b5de6;
+    border-radius:7px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+
+.task-check.completed{
+    background:#20c997;
+    border-color:#20c997;
+}
+
+.task-text{
+    flex:1;
+}
+
+.task-text.completed{
+    text-decoration:line-through;
+    color:#697286;
+}
+
+.delete-task{
+    background:transparent;
+    border:none;
+    color:#ff647c;
+    cursor:pointer;
+    font-size:17px;
+}
+
+/* =========================
+   TIMERS
+========================= */
+
+.timer-card{
+    text-align:center;
+}
+
+.timer-display{
+    color:#48d7ff;
+    font-size:42px;
+    font-weight:bold;
+    letter-spacing:3px;
+    margin:12px 0;
+}
+
+.custom-display{
+    color:#ffb13b;
+    font-size:38px;
+    font-weight:bold;
+    margin:12px 0;
+}
+
+.session-display{
+    color:#20c997;
+    font-size:38px;
+    font-weight:bold;
+    margin:12px 0;
+}
+
+.timer-buttons{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+}
+
+.timer-buttons button{
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.start{
+    background:#20c997;
+}
+
+.pause{
+    background:#ff5268;
+}
+
+.reset{
+    background:#29334d;
+}
+
+.custom-inputs{
+    display:flex;
+    justify-content:center;
+    gap:7px;
+    margin-top:10px;
+}
+
+.custom-inputs input{
+    width:48px;
+    text-align:center;
+}
+
+/* =========================
+   SESSION
+========================= */
+
+.session-status{
+    color:#9aa3b8;
+    margin-bottom:10px;
+}
+
+.session-status span{
+    color:#20c997;
+    font-weight:bold;
+}
+
+.subject-popup{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:3000;
+    background:rgba(0,0,0,.75);
+    align-items:center;
+    justify-content:center;
+    backdrop-filter:blur(6px);
+}
+
+.subject-popup-box{
+    width:320px;
+    padding:25px;
+    background:#131a2a;
+    border:1px solid #29334d;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 25px 70px rgba(0,0,0,.5);
+}
+
+.subject-popup-box h2{
+    color:white;
+    margin-bottom:20px;
+}
+
+.subject-popup-box button{
+    display:block;
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border:1px solid #29334d;
+    border-radius:9px;
+    background:#1b2438;
+    color:white;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.subject-popup-box button:hover{
+    background:#263451;
+    transform:translateY(-1px);
+}
+
+.subject-popup-box .subject-cancel{
+    margin-top:15px;
+    background:transparent;
+    color:#8991a6;
+    border-color:transparent;
+}
+
+/* =========================
+   PIE
+========================= */
+
+.distribution-card{
+    grid-column:4;
+}
+
+.chart-wrapper{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+}
+
+#pieChart{
+    width:330px;
+    height:330px;
+    max-width:90%;
+    max-height:90%;
+    border-radius:50%;
+    margin:20px auto;
+    border:4px solid #0b101c;
+    flex-shrink:0;
+}
+
+.chart-legend{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 20px;
+    margin-top:20px;
+    color:#8991a6;
+    font-size:13px;
+}
+
+.legend{
+    display:inline-block;
+    width:12px;
+    height:12px;
+    border-radius:3px;
+    margin-right:5px;
+}
+
+.legend.maths{
+    background:#48d7ff;
+}
+
+.legend.physics{
+    background:#ff6b81;
+}
+
+.legend.chemistry{
+    background:#20c997;
+}
+
+.legend.other{
+    background:#ffb13b;
+}
+
+.reset-data-btn{
+    position:relative;
+    left:0;
+    top:0;
+    margin:25px;
+    width:180px;
+    padding:11px;
+    border:1px solid #ff5268;
+    border-radius:9px;
+    background:transparent;
+    color:#ff5268;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.reset-data-btn:hover{
+    background:#ff5268;
+    color:white;
+}
+
+/* =========================
+   MARK ANALYZE
+========================= */
+
+.analyze-button{
+    width:100%;
+    margin-top:18px;
+    padding:15px;
+    border:none;
+    border-radius:13px;
+    background:linear-gradient(90deg,#7357ff,#a34cff);
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* =========================
+   GENERAL POPUP
+========================= */
+
+.fullscreen-popup{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(3,5,10,.94);
+    align-items:center;
+    justify-content:center;
+}
+
+.popup-box{
+    width:min(700px,90%);
+    max-height:90vh;
+    overflow-y:auto;
+    background:#131a2a;
+    border:1px solid #29334d;
+    border-radius:22px;
+    padding:35px;
+    position:relative;
+}
+
+.popup-box h1{
+    font-size:36px;
+    margin-bottom:25px;
+}
+
+.popup-stat{
+    display:flex;
+    justify-content:space-between;
+    padding:16px 0;
+    color:#8991a6;
+}
+
+.popup-stat strong{
+    color:white;
+}
+
+.popup-box hr{
+    border:none;
+    border-top:1px solid #29334d;
+    margin:15px 0;
+}
+
+.close-popup{
+    position:absolute;
+    right:20px;
+    top:20px;
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:50%;
+    background:#252f47;
+    color:white;
+    cursor:pointer;
+}
+
+/* =========================
+   FULLSCREEN TIMER
+========================= */
+
+.fullscreen-timer-box{
+    position:relative;
+    text-align:center;
+}
+
+#fullscreenTimerTitle{
+    color:#8991a6;
+    font-size:25px;
+    margin-bottom:20px;
+}
+
+#fullscreenTimerValue{
+    font-size:clamp(80px,15vw,200px);
+    font-weight:bold;
+    color:#48d7ff;
+}
+
+.fullscreen-timer-box p{
+    color:#59647a;
+}
+
+/* =========================
+   CUSTOM TIMER FINISH POPUP
+========================= */
+
+.timer-finish-popup{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:6000;
+    background:rgba(3,5,10,.88);
+    backdrop-filter:blur(7px);
+    align-items:center;
+    justify-content:center;
+}
+
+.timer-finish-box{
+    width:min(430px,90%);
+    padding:35px;
+    text-align:center;
+    background:#131a2a;
+    border:1px solid #29334d;
+    border-radius:22px;
+    box-shadow:0 25px 80px rgba(0,0,0,.6);
+    animation:finishPopupIn .25s ease;
+}
+
+@keyframes finishPopupIn{
+    from{
+        opacity:0;
+        transform:scale(.85);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+.finish-icon{
+    font-size:55px;
+    margin-bottom:12px;
+}
+
+.timer-finish-box h2{
+    font-size:27px;
+    margin-bottom:10px;
+}
+
+.timer-finish-box p{
+    color:#8991a6;
+    margin-bottom:25px;
+}
+
+.finish-close-btn{
+    border:none;
+    padding:12px 30px;
+    border-radius:10px;
+    background:#5b5de6;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* =========================
+   RESET POPUP
+========================= */
+
+.reset-popup{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    background:rgba(3,5,10,.88);
+    align-items:center;
+    justify-content:center;
+    backdrop-filter:blur(6px);
+}
+
+.reset-popup-box{
+    width:min(420px,90%);
+    background:#131a2a;
+    border:1px solid #29334d;
+    border-radius:20px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 25px 70px rgba(0,0,0,.5);
+}
+
+.reset-icon{
+    font-size:42px;
+    margin-bottom:12px;
+}
+
+.reset-popup-box h2{
+    color:white;
+    margin-bottom:10px;
+}
+
+.reset-popup-box p{
+    color:#8991a6;
+    line-height:1.6;
+    margin-bottom:25px;
+}
+
+.reset-popup-buttons{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.reset-popup-buttons button{
+    border:none;
+    padding:11px 20px;
+    border-radius:9px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.cancel-reset{
+    background:#29334d;
+    color:white;
+}
+
+.confirm-reset{
+    background:#ff5268;
+    color:white;
+}
+
+/* =========================
+   MARK ANALYZE POPUPS
+========================= */
+
+.mark-choice-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:20px;
+}
+
+.mark-choice-btn{
+    padding:18px;
+    border:1px solid #29334d;
+    border-radius:12px;
+    background:#1b2438;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.mark-choice-btn:hover{
+    background:#263451;
+}
+
+.mark-form{
+    margin-top:10px;
+}
+
+.mark-form label{
+    display:block;
+    color:#8991a6;
+    margin:12px 0 7px;
+}
+
+.mark-form input,
+.mark-form select{
+    width:100%;
+    padding:12px;
+    border-radius:9px;
+    border:1px solid #29334d;
+    background:#0d1422;
+    color:white;
+    outline:none;
+}
+
+.mark-form input:focus,
+.mark-form select:focus{
+    border-color:#5b5de6;
+}
+
+.mark-save-btn{
+    width:100%;
+    padding:13px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:#20c997;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.mark-cancel-btn{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:1px solid #29334d;
+    border-radius:10px;
+    background:transparent;
+    color:#8991a6;
+    cursor:pointer;
+}
+
+.mark-subject-list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:15px;
+}
+
+.mark-subject-btn{
+    padding:11px;
+    border:1px solid #29334d;
+    border-radius:9px;
+    background:#1b2438;
+    color:white;
+    cursor:pointer;
+}
+
+.mark-subject-btn:hover{
+    background:#263451;
+}
+
+/* =========================
+   MARK ANALYZE CHART
+========================= */
+
+.mark-chart-wrapper{
+    margin-top:20px;
+    width:100%;
+    height:330px;
+    background:#0d1422;
+    border:1px solid #222c43;
+    border-radius:15px;
+    padding:15px;
+}
+
+#markChart{
+    width:100%;
+    height:100%;
+}
+
+/* =========================
+   SETTINGS
+========================= */
+.settings-button{
+    width:38px;height:38px;border:1px solid #29334d;border-radius:50%;
+    background:#11182a;color:white;cursor:pointer;font-size:18px;
+    display:inline-flex;align-items:center;justify-content:center;transition:.2s;
+}
+.settings-button:hover{background:#263451;transform:rotate(25deg);}
+.greeting-wrap{display:flex;align-items:center;gap:10px;}
+.settings-popup{display:none;position:fixed;inset:0;z-index:7000;background:rgba(3,5,10,.88);backdrop-filter:blur(7px);align-items:center;justify-content:center;}
+.settings-box{width:min(520px,92%);max-height:90vh;overflow:auto;background:#131a2a;border:1px solid #29334d;border-radius:22px;padding:30px;box-shadow:0 25px 80px rgba(0,0,0,.6);}
+.settings-box h2{margin-bottom:7px;}
+.settings-box>p{color:#8991a6;margin-bottom:22px;}
+.color-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:15px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07);}
+.color-row span{color:#cbd2e1;font-weight:bold;font-size:14px;}
+.color-row input[type=color]{width:54px;height:34px;padding:2px;border:1px solid #29334d;border-radius:8px;background:#0d1422;cursor:pointer;}
+.settings-actions{display:flex;gap:10px;margin-top:22px;}
+.settings-actions button{flex:1;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;}
+.settings-save{background:#20c997;color:white;}
+.settings-reset{background:#29334d;color:white;}
+
+/* MARK ACTION CHOICE */
+.mark-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:22px;}
+.mark-action-btn{padding:20px;border:1px solid #29334d;border-radius:14px;background:#1b2438;color:white;cursor:pointer;font-weight:bold;font-size:15px;transition:.2s;}
+.mark-action-btn:hover{background:#263451;transform:translateY(-2px);}
+.mark-action-btn.add{border-color:#20c997;}
+.mark-action-btn.display{border-color:#7357ff;}
+.mark-empty{padding:25px;text-align:center;color:#8991a6;background:#0d1422;border:1px solid #222c43;border-radius:12px;margin-top:20px;}
+
+/* THEME OVERRIDES — defaults remain unchanged */
+#dashboard{background:var(--theme-bg);color:var(--theme-text);}
+.card,.popup-box,.subject-popup-box,.timer-finish-box,.reset-popup-box,.settings-box{background:var(--theme-card);border-color:var(--theme-border);}
+.todo-input input,.todo-input select,.custom-inputs input,.mark-form input,.mark-form select,.mark-chart-wrapper{background:var(--theme-input);border-color:var(--theme-border);}
+.greeting,.day,.mark-choice-btn,.mark-subject-btn,.mark-action-btn{border-color:var(--theme-border);}
+.greeting{background:var(--theme-card);}
+
+.analyze-button{background:linear-gradient(90deg,var(--theme-accent),#a34cff);}
+.mark-action-btn.display{border-color:var(--theme-accent2);}
+.mark-save-btn,.settings-save{background:var(--theme-success);}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1100px){
+
+    body{
+        overflow:auto;
+    }
+
+    #dashboard{
+        height:auto;
+    }
+
+    .dashboard-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .distribution-card{
+        grid-column:auto;
+    }
+
+}
+
+@media(max-width:700px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+    .stream-options,
+    #subjectOptions,
+    .mark-choice-grid{
+        grid-template-columns:1fr;
+    }
+
+    .dashboard-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+}
+
+
+/* =========================
+   MOBILE DASHBOARD MODE
+   Keeps the desktop layout intact.
+========================= */
+.mobile-quick-controls,.mobile-panel-backdrop{display:none;}
+
+@media (max-width:700px){
+    html,body{
+        width:100%;
+        min-width:0;
+        max-width:100%;
+        overflow-x:hidden;
+        -webkit-text-size-adjust:100%;
+        touch-action:pan-y;
+    }
+
+    body{overflow:auto;}
+
+    #dashboard{
+        width:100%;
+        min-height:100vh;
+        min-height:100svh;
+        min-height:100dvh;
+        height:auto;
+        padding:clamp(12px,4vw,20px);
+        padding-top:calc(clamp(58px,14vw,78px) + env(safe-area-inset-top));
+        padding-bottom:calc(28px + env(safe-area-inset-bottom));
+        overflow:visible;
+    }
+
+    .dashboard-header{
+        width:100%;
+        margin-bottom:16px;
+        gap:10px;
+        align-items:flex-start;
+    }
+
+    .dashboard-header>div:first-child{width:100%;}
+    .dashboard-header h1{font-size:clamp(20px,6vw,27px);line-height:1.15;}
+    .dashboard-header p{font-size:clamp(12px,3.5vw,15px);line-height:1.35;}
+
+    .greeting-wrap{
+        position:absolute;
+        top:calc(10px + env(safe-area-inset-top));
+        right:clamp(12px,4vw,20px);
+        gap:7px;
+    }
+    .greeting{
+        padding:8px 12px;
+        border-radius:18px;
+        font-size:11px;
+        white-space:nowrap;
+    }
+    .settings-button{width:34px;height:34px;font-size:16px;}
+
+    /* Only the three productivity timers remain in the main flow. */
+    .dashboard-grid{
+        display:block;
+        width:100%;
+    }
+
+    .timer-column{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:12px;
+        width:100%;
+        height:auto;
+    }
+
+    .timer-column>.card{
+        width:100%;
+        min-width:0;
+        flex:none;
+    }
+
+    .timer-card,.session-card{padding:clamp(14px,4vw,20px);}
+    .timer-card h2,.session-card h2{font-size:clamp(16px,4.7vw,20px);margin-bottom:10px;}
+    .timer-display{font-size:clamp(34px,10vw,46px);margin:9px 0;}
+    .custom-display,.session-display{font-size:clamp(30px,9vw,40px);margin:9px 0;}
+
+    .timer-buttons{flex-wrap:wrap;gap:7px;}
+    .timer-buttons button{padding:10px clamp(12px,4vw,18px);font-size:12px;}
+    .custom-inputs{flex-wrap:wrap;}
+    .custom-inputs input{width:clamp(44px,13vw,55px);}
+    .custom-inputs button{padding:10px 14px;}
+
+    /* Desktop cards become slide-out mobile panels. */
+    .week-card,.todo-card,.distribution-card{
+        position:fixed;
+        z-index:6100;
+        display:none;
+        width:min(88vw,360px);
+        max-height:calc(100vh - 105px);
+        max-height:calc(100svh - 105px);
+        max-height:calc(100dvh - 105px);
+        overflow:auto;
+        top:calc(64px + env(safe-area-inset-top));
+        margin:0;
+        box-shadow:0 20px 70px rgba(0,0,0,.65);
+        animation:mobilePanelIn .22s ease both;
+    }
+
+    .week-card{left:12px;border-top-left-radius:8px;}
+    .todo-card{left:12px;top:calc(64px + env(safe-area-inset-top));margin-top:0;}
+    .distribution-card{right:12px;}
+
+    #dashboard.mobile-left-open .week-card,
+    #dashboard.mobile-left-open .todo-card{display:block;}
+
+    #dashboard.mobile-right-open .distribution-card{display:block;}
+
+    /* When the left drawer is open, stack its two cards neatly. */
+    #dashboard.mobile-left-open .week-card{top:calc(64px + env(safe-area-inset-top));}
+    #dashboard.mobile-left-open .todo-card{top:calc(64px + env(safe-area-inset-top));transform:translateY(0);}
+
+    .week-days{
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:8px;
+    }
+    .day{height:46px;font-size:12px;}
+    .week-number{margin-top:10px;}
+
+    .todo-card{
+        /* JS gives the drawer a clean single-panel view by moving it above the week card when opened. */
+    }
+    .todo-input{gap:7px;}
+    .todo-input input,.todo-input select,.todo-input button{font-size:13px;}
+
+    #pieChart{
+        width:min(72vw,290px);
+        height:min(72vw,290px);
+        margin:10px auto 15px;
+    }
+    .chart-legend{grid-template-columns:1fr 1fr;gap:8px 10px;font-size:11px;}
+
+    .analyze-button{
+        width:100%;
+        margin-top:12px;
+        min-height:48px;
+        font-size:14px;
+    }
+
+    .mobile-quick-controls{
+        display:block;
+        position:fixed;
+        inset:0;
+        z-index:6200;
+        pointer-events:none;
+    }
+    .mobile-tab{
+        pointer-events:auto;
+        position:absolute;
+        top:calc(12px + env(safe-area-inset-top));
+        width:42px;height:42px;
+        border:1px solid var(--theme-border);
+        border-radius:12px;
+        background:var(--theme-card);
+        color:var(--theme-text);
+        box-shadow:0 8px 25px rgba(0,0,0,.35);
+        font-size:20px;
+        cursor:pointer;
+        -webkit-tap-highlight-color:transparent;
+    }
+    .mobile-left-tab{left:12px;}
+    .mobile-right-tab{right:12px;}
+    .mobile-tab:active{transform:scale(.94);}
+
+    .mobile-panel-backdrop{
+        position:fixed;
+        inset:0;
+        z-index:6050;
+        background:rgba(0,0,0,.42);
+        backdrop-filter:blur(2px);
+    }
+    #dashboard.mobile-left-open .mobile-panel-backdrop,
+    #dashboard.mobile-right-open .mobile-panel-backdrop{display:block;}
+
+    /* Left quick panel: week + to-do are shown in one scrollable drawer. */
+    #dashboard.mobile-left-open .week-card{
+        display:block;
+        bottom:12px;
+        max-height:calc(100vh - 90px);
+        max-height:calc(100svh - 90px);
+        max-height:calc(100dvh - 90px);
+    }
+    #dashboard.mobile-left-open .todo-card{
+        display:block;
+        top:auto;
+        bottom:12px;
+        max-height:calc(100vh - 90px);
+        max-height:calc(100svh - 90px);
+        max-height:calc(100dvh - 90px);
+        transform:translateY(0);
+        margin-bottom:0;
+        /* Hide the duplicate week card behind the to-do drawer after a short screen;
+           both remain available through the compact Week heading. */
+    }
+
+    /* Make the week card and to-do card independently reachable by tapping their headings. */
+    #dashboard.mobile-left-open .week-card{
+        width:calc(44vw - 12px);
+        right:auto;
+        overflow:hidden;
+    }
+    #dashboard.mobile-left-open .todo-card{
+        width:calc(56vw - 12px);
+        left:calc(44vw);
+    }
+
+    .distribution-card{
+        bottom:12px;
+        max-height:calc(100vh - 90px);
+        max-height:calc(100svh - 90px);
+        max-height:calc(100dvh - 90px);
+    }
+
+    @keyframes mobilePanelIn{
+        from{opacity:0;transform:translateY(8px) scale(.98)}
+        to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    /* Prevent accidental horizontal zoom/overflow from large popups. */
+    .popup-box,.settings-box,.subject-popup-box,.reset-popup-box,.timer-finish-box{
+        width:min(94vw,520px);
+        max-width:94vw;
+    }
+    .mark-chart-wrapper{height:clamp(250px,68vw,330px);}
+    #markChart{max-width:100%;}
+}
+
+@media (max-width:700px){
+    /* Older mobile browsers: keep the app in a real viewport even without dvh support. */
+    html,body{
+        min-height:100%;
+        width:100%;
+        overflow-x:hidden;
+    }
+    #splash,#hello{
+        width:100%;
+        height:100%;
+        min-height:100vh;
+        min-height:100svh;
+        min-height:100dvh;
+    }
+    #dashboard{
+        position:relative;
+        z-index:1;
+        isolation:isolate;
+    }
+    .mobile-quick-controls{
+        z-index:6200;
+    }
+}
+
+@media (min-width:701px){
+    .mobile-quick-controls,.mobile-panel-backdrop{display:none!important;}
+}
+
+</style>
+
 <style>
   * {
     -webkit-user-select: none;
@@ -149,451 +1460,1061 @@ button.selected {
 
 <body>
 
-<!-- Onboarding: Slide 1 -->
-    <div id="setupSlide1" class="card">
-        <h2>Welcome to Study Tracker</h2>
-        <div class="form-group">
-            <label>Name:</label>
-            <input type="text" id="userNameInput" placeholder="Enter your name">
-        </div>
-        <div class="form-group">
-            <label>Age:</label>
-            <input type="number" id="userAgeInput" placeholder="Enter your age">
-        </div>
-        <div class="form-group">
-            <label>Target Exam Year / Goal:</label>
-            <input type="text" id="userTargetInput" placeholder="e.g. 2026 A/L">
-        </div>
-        <div class="form-group">
-            <label>Exam:</label>
-            <select id="userExamSelect">
-                <option value="">-- Select Exam --</option>
-                <option value="OL">O/L</option>
-                <option value="AL">A/L</option>
-            </select>
-        </div>
-        <button onclick="nextFromSlide1()">Next</button>
+<!-- =========================
+     SPLASH
+========================= -->
+
+<div id="splash">
+
+    <div class="s-logo">S</div>
+
+    <div class="powered">
+        POWERED BY MR_SMILE
     </div>
 
-    <!-- Onboarding: O/L Subject Selection -->
-    <div id="olSubjectSlide" class="card" style="display: none;">
-        <h2>Select O/L Subjects</h2>
-        <p id="olCoreList"></p>
-        <div class="form-group">
-            <label>Basket 1:</label>
-            <select id="olBasket1"></select>
-        </div>
-        <div class="form-group">
-            <label>Basket 2:</label>
-            <select id="olBasket2"></select>
-        </div>
-        <div class="form-group">
-            <label>Basket 3:</label>
-            <select id="olBasket3"></select>
-        </div>
-        <button onclick="backToSlide1FromOL()">Back</button>
-        <button onclick="finishOLSubjects()">Finish</button>
-    </div>
+</div>
 
-    <!-- Onboarding: A/L Stream Selection -->
-    <div id="setupSlide2" class="card" style="display: none;">
-        <h2>Select A/L Stream</h2>
-        <button onclick="selectStream('Physical Science')">Physical Science</button>
-        <button onclick="selectStream('Bio Science')">Bio Science</button>
-        <button onclick="selectStream('Commerce')">Commerce</button>
-        <button onclick="selectStream('Arts')">Arts</button>
-        <button onclick="selectStream('Technology')">Technology</button>
-        <br><br>
-        <button onclick="backToSlide1()">Back</button>
-    </div>
 
-    <!-- Onboarding: A/L Subject Selection -->
-    <div id="subjectSelectionSlide" class="card" style="display: none;">
-        <h2>Select 3 Subjects</h2>
-        <div id="subjectListContainer" class="button-grid"></div>
-        <br>
-        <button onclick="backToSlide2()">Back</button>
-        <button onclick="finishSubjects()">Finish</button>
-    </div>
+<!-- =========================
+     SETUP
+========================= -->
 
-    <!-- Hello / Greeting Screen -->
-    <div id="helloSlide" class="card" style="display: none;">
-        <h1>Hello, <span id="helloName"></span>! 👋</h1>
-        <p>Let's get ready for studying...</p>
-    </div>
+<section id="setup">
 
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="hidden" style="display: none;">
-        <h1>Study Dashboard</h1>
-        
-        <!-- Week Tracker -->
-        <div class="card">
-            <h3>Week <span id="weekNumber">00</span></h3>
-            <div class="days-grid">
-                <div class="day" data-day="0">Sun</div>
-                <div class="day" data-day="1">Mon</div>
-                <div class="day" data-day="2">Tue</div>
-                <div class="day" data-day="3">Wed</div>
-                <div class="day" data-day="4">Thu</div>
-                <div class="day" data-day="5">Fri</div>
-                <div class="day" data-day="6">Sat</div>
-            </div>
-        </div>
+<div class="setup-box">
 
-        <!-- Task Tracker -->
-        <div class="card">
-            <h3>Tasks / To-Do</h3>
-            <div class="form-inline">
-                <input type="text" id="taskInput" placeholder="Add a new task...">
-                <select id="taskSubject"></select>
-                <button onclick="addTask()">Add Task</button>
-            </div>
-            <div id="taskList"></div>
-        </div>
+<!-- SLIDE 1 -->
 
-        <!-- Session & Subject Selector -->
-        <div class="card">
-            <h3>Start Study Session</h3>
-            <div id="sessionSubjects" class="button-grid"></div>
-        </div>
+<div id="setupSlide1">
 
-        <!-- Legend / Analytics -->
-        <div class="card">
-            <h3>Subject Overview</h3>
-            <div id="chartLegend"></div>
-        </div>
-    </div>
+<h1>Welcome 👋</h1>
 
-    <!-- Day Info Popup Modal -->
-    <div id="dayPopup" class="modal" style="display: none;">
-        <div class="modal-content card">
-            <h3 id="popupDayTitle">Day Info</h3>
-            <p><strong>Today's Study Time:</strong> <span id="popupDayTotal">0h 0m</span></p>
-            <p><strong>Sessions Completed:</strong> <span id="popupDaySessions">0</span></p>
-            <p><strong>Weekly Total:</strong> <span id="popupWeekTotal">0h 0m</span></p>
-            <p><strong>Weekly Average:</strong> <span id="popupWeekAvg">0h 0m</span></p>
-            <button onclick="document.getElementById('dayPopup').style.display='none'">Close</button>
-        </div>
-    </div>
+<p>Let's get to know you.</p>
+
+<div class="input-group">
+
+<label>Your Name</label>
+
+<input
+    type="text"
+    id="name"
+    placeholder="Enter your name"
+>
+
+</div>
+
+<div class="input-group">
+
+<label>Your Age</label>
+
+<input
+    type="number"
+    id="age"
+    placeholder="Enter your age"
+>
+
+</div>
+
+<div class="input-group">
+
+<label>School / Institute</label>
+
+<input
+    type="text"
+    id="school"
+    placeholder="Enter school or institute"
+>
+
+</div>
+
+<div class="input-group">
+
+<label>What are you studying?</label>
+
+<select id="studyLevel">
+
+<option value="">
+    Select your level
+</option>
+
+<option value="OL">
+    O/L Student
+</option>
+
+<option value="AL">
+    A/L Student
+</option>
+
+</select>
+
+</div>
+
+<button
+    class="continue-btn"
+    onclick="nextFromSlide1()"
+>
+NEXT
+</button>
+
+</div>
+
+
+<!-- SLIDE 2 -->
+
+<div id="setupSlide2" style="display:none;">
+
+<h1>Choose Your Stream</h1>
+
+<p>Select your A/L stream.</p>
+
+<div class="stream-options">
+
+<button onclick="selectStream('Art')">
+Art Stream
+</button>
+
+<button onclick="selectStream('Maths')">
+Maths Stream
+</button>
+
+<button onclick="selectStream('Bio')">
+Bio Stream
+</button>
+
+<button onclick="selectStream('Technology')">
+Tech Stream
+</button>
+
+<button onclick="selectStream('Commerce')">
+Commerce Stream
+</button>
+
+</div>
+
+<button
+    class="back-btn"
+    onclick="backToSlide1()"
+>
+← BACK
+</button>
+
+</div>
+
+
+<!-- SLIDE 3 -->
+
+<div id="setupSlide3" style="display:none;">
+
+<h1 id="subjectTitle">
+Choose Your Subjects
+</h1>
+
+<p>Select 3 subjects.</p>
+
+<div id="subjectOptions"></div>
+
+<button
+    class="continue-btn"
+    onclick="finishSubjects()"
+>
+NEXT
+</button>
+
+<button
+    class="back-btn"
+    onclick="backToSlide2()"
+>
+← BACK
+</button>
+
+</div>
+
+
+<!-- O/L SUBJECT SLIDE -->
+
+<div id="olSubjectSlide" style="display:none;">
+
+<h1>Choose Your Subjects</h1>
+
+<p>
+Your 6 main subjects are already selected.
+Choose one subject from each basket.
+</p>
+
+<div
+    id="olCoreSubjects"
+    style="
+        margin-bottom:20px;
+        color:#8991a6;
+        line-height:1.8;
+    "
+></div>
+
+<div class="input-group">
+
+<label>Basket 1</label>
+
+<select id="olBasket1">
+<option value="">Select Basket 1 Subject</option>
+</select>
+
+</div>
+
+<div class="input-group">
+
+<label>Basket 2</label>
+
+<select id="olBasket2">
+<option value="">Select Basket 2 Subject</option>
+</select>
+
+</div>
+
+<div class="input-group">
+
+<label>Basket 3</label>
+
+<select id="olBasket3">
+<option value="">Select Basket 3 Subject</option>
+</select>
+
+</div>
+
+<button
+    class="continue-btn"
+    onclick="finishOLSubjects()"
+>
+NEXT
+</button>
+
+<button
+    class="back-btn"
+    onclick="backToSlide1FromOL()"
+>
+← BACK
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     HELLO
+========================= -->
+
+<section id="hello">
+
+<div class="hello-small">
+HELLO
+</div>
+
+<div
+    class="user-name"
+    id="helloName"
+></div>
+
+</section>
+
+
+<!-- =========================
+     DASHBOARD
+========================= -->
+
+<section id="dashboard">
+
+<!-- MOBILE QUICK PANELS -->
+<div class="mobile-quick-controls" aria-label="Quick panels">
+    <button class="mobile-tab mobile-left-tab" type="button" onclick="toggleMobilePanel('left')" aria-label="Open To-Do and Week">☰</button>
+    <button class="mobile-tab mobile-right-tab" type="button" onclick="toggleMobilePanel('right')" aria-label="Open Today's Distribution">◒</button>
+</div>
+<div class="mobile-panel-backdrop" id="mobilePanelBackdrop" onclick="closeMobilePanels()"></div>
+
+
+<div class="dashboard-header">
+
+<div>
+
+<h1>
+📚 Study Productivity Dashboard
+</h1>
+
+<p>
+Track your study time and stay productive.
+</p>
+
+</div>
+
+<div class="greeting-wrap">
+
+<div class="greeting">
+
+Good Day
+<span id="dashName"></span>
+
+</div>
+
+<button
+    class="settings-button"
+    type="button"
+    onclick="openSettings()"
+    title="Customize Colors"
+    aria-label="Customize Colors"
+>
+    ⚙️
+</button>
+
+</div>
+
+</div>
+
+
+<div class="dashboard-grid">
+
+
+<!-- WEEK -->
+
+<div class="card week-card">
+
+<h2>📅 Week</h2>
+
+<div class="week-days">
+
+<button class="day" data-day="1">
+<span>MO</span>
+</button>
+
+<button class="day" data-day="2">
+<span>TU</span>
+</button>
+
+<button class="day" data-day="3">
+<span>WE</span>
+</button>
+
+<button class="day" data-day="4">
+<span>TH</span>
+</button>
+
+<button class="day" data-day="5">
+<span>FR</span>
+</button>
+
+<button class="day" data-day="6">
+<span>SA</span>
+</button>
+
+<button class="day" data-day="0">
+<span>SU</span>
+</button>
+
+</div>
+
+<div class="week-number">
+
+<span>WEEK</span>
+
+<strong id="weekNumber">
+01
+</strong>
+
+</div>
+
+</div>
+
+
+<!-- TODO -->
+
+<div class="card todo-card">
+
+<h2>📝 To-Do List</h2>
+
+<div class="todo-input">
+
+<input
+    type="text"
+    id="taskInput"
+    placeholder="What is your next goal?"
+>
+
+<select id="taskSubject"></select>
+
+<button onclick="addTask()">
+Add Task
+</button>
+
+</div>
+
+<div id="taskList"></div>
+
+</div>
+
+
+<!-- TIMERS -->
+
+<div class="timer-column">
+
+
+<!-- POMODORO -->
+
+<div class="card timer-card">
+
+<h2>🍅 Pomodoro</h2>
+
+<div
+    class="timer-display"
+    id="pomodoroDisplay"
+>
+25:00
+</div>
+
+<div class="timer-buttons">
+
+<button
+    class="start"
+    onclick="startPomodoro()"
+>
+Start
+</button>
+
+<button
+    class="pause"
+    onclick="pausePomodoro()"
+>
+Pause
+</button>
+
+<button
+    class="reset"
+    onclick="resetPomodoro()"
+>
+Reset
+</button>
+
+</div>
+
+</div>
+
+
+<!-- CUSTOM -->
+
+<div class="card timer-card">
+
+<h2>⚙️ Custom Timer</h2>
+
+<div
+    class="custom-display"
+    id="customDisplay"
+>
+00:00:00
+</div>
+
+<div class="timer-buttons">
+
+<button
+    class="start"
+    onclick="startCustomTimer()"
+>
+Start
+</button>
+
+<button
+    class="pause"
+    onclick="pauseCustomTimer()"
+>
+Pause
+</button>
+
+<button
+    class="reset"
+    onclick="resetCustomTimer()"
+>
+Reset
+</button>
+
+</div>
+
+<div class="custom-inputs">
+
+<input
+    type="number"
+    id="customHours"
+    placeholder="H"
+    min="0"
+>
+
+<input
+    type="number"
+    id="customMinutes"
+    placeholder="M"
+    min="0"
+    max="59"
+>
+
+<input
+    type="number"
+    id="customSeconds"
+    placeholder="S"
+    min="0"
+    max="59"
+>
+
+<button onclick="setCustomTimer()">
+Set
+</button>
+
+</div>
+
+</div>
+
+
+<!-- SESSION -->
+
+<div class="card session-card">
+
+<h2>🚀 Session Tracker</h2>
+
+<div class="session-status">
+
+Status:
+<span id="sessionStatus">
+Idle
+</span>
+
+</div>
+
+<div
+    class="session-display"
+    id="sessionDisplay"
+>
+00:00:00
+</div>
+
+<div class="timer-buttons">
+
+<button
+    class="start"
+    onclick="openSubjectPopup()"
+>
+Start
+</button>
+
+<button
+    class="pause"
+    onclick="endSession()"
+>
+End
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- PIE -->
+
+<div class="card distribution-card">
+
+<h2>📊 Today's Distribution</h2>
+
+<div class="chart-wrapper">
+
+<div id="pieChart"></div>
+
+<div
+    class="chart-legend"
+    id="chartLegend"
+></div>
+
+</div>
+
+<button
+    class="reset-data-btn"
+    onclick="openResetPopup()"
+>
+🗑️ RESET DATA
+</button>
+
+</div>
+
+</div>
+
+
+<!-- MARK ANALYZE -->
+
+<button
+    class="analyze-button"
+    onclick="openMarkAnalyze()"
+>
+📊 Mark Analyze
+</button>
+
+
+<!-- =========================
+     SETTINGS POPUP
+========================= -->
+<div id="settingsPopup" class="settings-popup">
+<div class="settings-box">
+<button class="close-popup" onclick="closeSettings()">✕</button>
+<h2>⚙️ Customize Colors</h2>
+<p>Change the colors of the dashboard. Your choices are saved automatically.</p>
+<div class="color-row"><span>Dashboard Background</span><input type="color" id="colorBg"></div>
+<div class="color-row"><span>Cards / Panels</span><input type="color" id="colorCard"></div>
+<div class="color-row"><span>Input Background</span><input type="color" id="colorInput"></div>
+<div class="color-row"><span>Borders</span><input type="color" id="colorBorder"></div>
+<div class="color-row"><span>Main Text</span><input type="color" id="colorText"></div>
+<div class="color-row"><span>Muted Text</span><input type="color" id="colorMuted"></div>
+<div class="color-row"><span>Accent</span><input type="color" id="colorAccent"></div>
+<div class="color-row"><span>Success</span><input type="color" id="colorSuccess"></div>
+<div class="settings-actions">
+<button class="settings-reset" onclick="resetTheme()">Reset Default</button>
+<button class="settings-save" onclick="saveTheme()">Save Colors</button>
+</div>
+</div>
+</div>
+
+<!-- DAY POPUP -->
+
+<div
+    id="dayPopup"
+    class="fullscreen-popup"
+>
+
+<div class="popup-box">
+
+<button
+    class="close-popup"
+    onclick="closePopup('dayPopup')"
+>
+✕
+</button>
+
+<h1 id="popupDayTitle">
+Monday
+</h1>
+
+<div class="popup-stat">
+
+<span>Study Time</span>
+
+<strong id="popupDayHours">
+0h 0m
+</strong>
+
+</div>
+
+<div class="popup-stat">
+
+<span>Sessions</span>
+
+<strong id="popupDaySessions">
+0
+</strong>
+
+</div>
+
+<hr>
+
+<h2>Weekly Summary</h2>
+
+<div class="popup-stat">
+
+<span>Total Weekly Study</span>
+
+<strong id="weeklyTotal">
+0h 0m
+</strong>
+
+</div>
+
+<div class="popup-stat">
+
+<span>Daily Average</span>
+
+<strong id="weeklyAverage">
+0h 0m
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- FULLSCREEN TIMER -->
+
+<div
+    id="timerPopup"
+    class="fullscreen-popup"
+>
+
+<div class="fullscreen-timer-box">
+
+<button
+    class="close-popup"
+    onclick="closePopup('timerPopup')"
+>
+✕
+</button>
+
+<div id="fullscreenTimerTitle">
+Pomodoro
+</div>
+
+<div id="fullscreenTimerValue">
+25:00
+</div>
+
+<p>
+Right-click again to close
+</p>
+
+</div>
+
+</div>
+
+
+</section>
+
+
+<!-- =========================
+     SUBJECT POPUP
+========================= -->
+
+<div
+    id="subjectPopup"
+    class="subject-popup"
+>
+
+<div class="subject-popup-box">
+
+<h2>
+What are you studying?
+</h2>
+
+<div id="sessionSubjects"></div>
+
+<button
+    class="subject-cancel"
+    onclick="closeSubjectPopup()"
+>
+Cancel
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     RESET POPUP
+========================= -->
+
+<div
+    id="resetPopup"
+    class="reset-popup"
+>
+
+<div class="reset-popup-box">
+
+<div class="reset-icon">
+⚠️
+</div>
+
+<h2>
+Reset Study Data?
+</h2>
+
+<p>
+This will permanently remove all your
+study time, sessions and chart data.
+</p>
+
+<div class="reset-popup-buttons">
+
+<button
+    class="cancel-reset"
+    onclick="closeResetPopup()"
+>
+Cancel
+</button>
+
+<button
+    class="confirm-reset"
+    onclick="confirmResetData()"
+>
+Reset Data
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     TIMER FINISH POPUP
+========================= -->
+
+<div
+    id="timerFinishPopup"
+    class="timer-finish-popup"
+>
+
+<div class="timer-finish-box">
+
+<div class="finish-icon">
+🎉
+</div>
+
+<h2 id="timerFinishTitle">
+Timer Completed!
+</h2>
+
+<p id="timerFinishMessage">
+Your timer has finished.
+</p>
+
+<button
+    class="finish-close-btn"
+    onclick="closeTimerFinishPopup()"
+>
+OK
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     MARK ANALYZE POPUP
+========================= -->
+
+<div
+    id="markPopup"
+    class="fullscreen-popup"
+>
+
+<div class="popup-box">
+
+<button
+    class="close-popup"
+    onclick="closePopup('markPopup')"
+>
+✕
+</button>
+
+<h1>
+📊 Mark Analyze
+</h1>
+
+<p style="color:#8991a6;">
+Choose the type of paper.
+</p>
+
+<div class="mark-choice-grid">
+
+<button
+    class="mark-choice-btn"
+    onclick="chooseMarkType('Past Paper')"
+>
+📚 Past Paper
+</button>
+
+<button
+    class="mark-choice-btn"
+    onclick="chooseMarkType('Class Paper')"
+>
+📝 Class Paper
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     MARK SUBJECT POPUP
+========================= -->
+
+<div
+    id="markSubjectPopup"
+    class="fullscreen-popup"
+>
+
+<div class="popup-box">
+
+<button
+    class="close-popup"
+    onclick="closePopup('markSubjectPopup')"
+>
+✕
+</button>
+
+<h1>
+Choose Subject
+</h1>
+
+<p style="color:#8991a6;">
+Select the subject you want to analyze.
+</p>
+
+<div
+    id="markSubjectList"
+    class="mark-subject-list"
+></div>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     MARK ACTION POPUP
+========================= -->
+<div id="markActionPopup" class="fullscreen-popup">
+<div class="popup-box">
+<button class="close-popup" onclick="closePopup('markActionPopup')">✕</button>
+<h1>📊 Mark Analyze</h1>
+<p style="color:#8991a6;">Choose what you want to do with <span id="markActionSubject">this subject</span>.</p>
+<div class="mark-action-grid">
+<button class="mark-action-btn add" onclick="openAddMarks()">➕ Add Marks</button>
+<button class="mark-action-btn display" onclick="openDisplayAnalyze()">📈 Display Analyze</button>
+</div>
+</div>
+</div>
+
+<!-- =========================
+     MARK FORM POPUP
+========================= -->
+
+<div
+    id="markFormPopup"
+    class="fullscreen-popup"
+>
+
+<div class="popup-box">
+
+<button
+    class="close-popup"
+    onclick="closePopup('markFormPopup')"
+>
+✕
+</button>
+
+<h1>
+Enter Marks
+</h1>
+
+<div class="mark-form">
+
+<label>
+Paper Name
+</label>
+
+<input
+    type="text"
+    id="paperName"
+    placeholder="Enter paper name"
+>
+
+<label>
+1st Part Marks
+</label>
+
+<input
+    type="number"
+    id="part1Marks"
+    placeholder="Enter 1st part marks"
+    min="0"
+>
+
+<label>
+2nd Part Marks
+</label>
+
+<input
+    type="number"
+    id="part2Marks"
+    placeholder="Enter 2nd part marks"
+    min="0"
+>
+
+<button
+    class="mark-save-btn"
+    onclick="saveMark()"
+>
+💾 Save Marks
+</button>
+
+<button
+    class="mark-cancel-btn"
+    onclick="closePopup('markFormPopup')"
+>
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     MARK ANALYSIS VIEW
+========================= -->
+
+<div
+    id="markAnalysisPopup"
+    class="fullscreen-popup"
+>
+
+<div class="popup-box">
+
+<button
+    class="close-popup"
+    onclick="closePopup('markAnalysisPopup')"
+>
+✕
+</button>
+
+<h1 id="analysisTitle">
+Mark Analysis
+</h1>
+
+<div
+    class="mark-chart-wrapper"
+>
+<canvas id="markChart"></canvas>
+</div>
+
+<div
+    id="markDetails"
+    style="
+        margin-top:20px;
+        color:#8991a6;
+        line-height:1.8;
+    "
+></div>
+
+</div>
+
+</div>
+
 
 <script>
 
-let tasks = JSON.parse(localStorage.getItem('studyTasks')) || [];
-let studyData = JSON.parse(localStorage.getItem('studyData')) || {};
-let selectedStream = '';
-let selectedSubjects = [];
-let userSubjects = JSON.parse(localStorage.getItem('userSubjects')) || [];
-let currentSubject = null;
-let helloTimer = null;
-let startupTimer = null;
-
-// Clean Start / Reveal Dashboard
-function revealDashboard() {
-    if (helloTimer) clearTimeout(helloTimer);
-    
-    ['setupSlide1', 'helloSlide', 'setupSlide2', 'olSubjectSlide', 'subjectSelectionSlide'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
-
-    const dashboard = document.getElementById('dashboard');
-    if (dashboard) {
-        dashboard.style.display = 'block';
-        dashboard.style.opacity = '1';
-    }
-
-    loadUserSubjects();
-    renderTasks();
-    updateWeekNumber();
-}
-
-function startApp() {
-    const userName = localStorage.getItem('userName');
-    const setupSlide1 = document.getElementById('setupSlide1');
-
-    if (userName) {
-        showHello(userName);
-    } else {
-        if (setupSlide1) setupSlide1.style.display = 'block';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', startApp);
-
-function showHello(userName) {
-    ['setupSlide1', 'setupSlide2', 'olSubjectSlide', 'subjectSelectionSlide'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
-
-    const helloSlide = document.getElementById('helloSlide');
-    const helloName = document.getElementById('helloName');
-    
-    if (helloSlide) {
-        helloSlide.style.display = 'block';
-        if (helloName) helloName.textContent = userName;
-        helloTimer = setTimeout(revealDashboard, 2500);
-    } else {
-        revealDashboard();
-    }
-}
-
-// Slide 1 Logic
-function nextFromSlide1() {
-    const userName = document.getElementById('userNameInput').value.trim();
-    const userAge = document.getElementById('userAgeInput').value.trim();
-    const userTarget = document.getElementById('userTargetInput').value.trim();
-    const userExam = document.getElementById('userExamSelect').value;
-
-    if (!userName || !userAge || !userTarget || !userExam) {
-        alert('කරුණාකර සියලු විස්තර ඇතුළත් කරන්න!');
-        return;
-    }
-
-    localStorage.setItem('userName', userName);
-    localStorage.setItem('userAge', userAge);
-    localStorage.setItem('userTarget', userTarget);
-    localStorage.setItem('userExam', userExam);
-
-    if (userExam === 'AL') {
-        document.getElementById('setupSlide1').style.display = 'none';
-        document.getElementById('setupSlide2').style.display = 'block';
-    } else {
-        openOLSubjects();
-    }
-}
-
-// O/L Logic
-const olCoreSubjects = ['Mathematics', 'Science', 'English', 'Sinhala/Tamil', 'History', 'Religion'];
-const olBasket1 = ['Business & Accounting', 'Geography', 'Civic Education', 'ICT', 'Agriculture', 'Second Language'];
-const olBasket2 = ['Music', 'Art', 'Dancing', 'Drama', 'English Literature', 'Sinhala Literature'];
-const olBasket3 = ['ICT', 'Agriculture & Food Tech', 'Health & Physical Ed', 'Design & Tech', 'Home Economics', 'Media Studies'];
-
-function openOLSubjects() {
-    document.getElementById('setupSlide1').style.display = 'none';
-    document.getElementById('olSubjectSlide').style.display = 'block';
-    document.getElementById('olCoreList').innerHTML = '<strong>Core:</strong> ' + olCoreSubjects.join(', ');
-    fillOLSelect('olBasket1', olBasket1);
-    fillOLSelect('olBasket2', olBasket2);
-    fillOLSelect('olBasket3', olBasket3);
-}
-
-function fillOLSelect(elemId, options) {
-    const select = document.getElementById(elemId);
-    select.innerHTML = '<option value="">-- Choose Subject --</option>';
-    options.forEach(opt => {
-        const o = document.createElement('option');
-        o.value = opt;
-        o.textContent = opt;
-        select.appendChild(o);
-    });
-}
-
-function finishOLSubjects() {
-    const b1 = document.getElementById('olBasket1').value;
-    const b2 = document.getElementById('olBasket2').value;
-    const b3 = document.getElementById('olBasket3').value;
-
-    if (!b1 || !b2 || !b3) {
-        alert('කරුණාකර Basket 3න්ම විෂයන් තෝරන්න!');
-        return;
-    }
-
-    userSubjects = [...olCoreSubjects, b1, b2, b3];
-    localStorage.setItem('userSubjects', JSON.stringify(userSubjects));
-    showHello(localStorage.getItem('userName'));
-}
-
-function backToSlide1FromOL() {
-    document.getElementById('olSubjectSlide').style.display = 'none';
-    document.getElementById('setupSlide1').style.display = 'block';
-}
-
-// A/L Stream Logic
-function selectStream(stream) {
-    selectedStream = stream;
-    selectedSubjects = [];
-    document.getElementById('setupSlide2').style.display = 'none';
-    document.getElementById('subjectSelectionSlide').style.display = 'block';
-    showSubjects(stream);
-}
-
-function showSubjects(stream) {
-    const container = document.getElementById('subjectListContainer');
-    container.innerHTML = '';
-    
-    const streamMap = {
-        'Physical Science': ['Combined Maths', 'Physics', 'Chemistry', 'ICT'],
-        'Bio Science': ['Biology', 'Physics', 'Chemistry', 'Agricultural Science'],
-        'Commerce': ['Accounting', 'Business Studies', 'Economics', 'ICT'],
-        'Arts': ['Economics', 'Political Science', 'Geography', 'Logic', 'Sinhala', 'English Lit', 'Media Studies'],
-        'Technology': ['SFT', 'Engineering Tech (ET)', 'Bio Systems Tech (BST)', 'ICT']
-    };
-
-    (streamMap[stream] || []).forEach(sub => {
-        const btn = document.createElement('button');
-        btn.textContent = sub;
-        btn.type = 'button';
-        btn.onclick = () => toggleSubject(btn, sub);
-        container.appendChild(btn);
-    });
-}
-
-function toggleSubject(btn, subject) {
-    if (selectedSubjects.includes(subject)) {
-        selectedSubjects = selectedSubjects.filter(s => s !== subject);
-        btn.classList.remove('selected');
-    } else {
-        if (selectedSubjects.length >= 3) {
-            alert('තෝරාගත හැක්කේ විෂයන් 3ක් පමණි!');
-            return;
-        }
-        selectedSubjects.push(subject);
-        btn.classList.add('selected');
-    }
-}
-
-function finishSubjects() {
-    if (selectedSubjects.length !== 3) {
-        alert('කරුණාකර විෂයන් 3ක් තෝරන්න!');
-        return;
-    }
-    userSubjects = [...selectedSubjects];
-    localStorage.setItem('userSubjects', JSON.stringify(userSubjects));
-    showHello(localStorage.getItem('userName'));
-}
-
-function backToSlide1() {
-    document.getElementById('setupSlide2').style.display = 'none';
-    document.getElementById('setupSlide1').style.display = 'block';
-}
-
-function backToSlide2() {
-    document.getElementById('subjectSelectionSlide').style.display = 'none';
-    document.getElementById('setupSlide2').style.display = 'block';
-}
-
-// Dashboard Functions
-function loadUserSubjects() {
-    userSubjects = JSON.parse(localStorage.getItem('userSubjects')) || [];
-    const taskSelect = document.getElementById('taskSubject');
-    const sessionContainer = document.getElementById('sessionSubjects');
-    
-    if (taskSelect) taskSelect.innerHTML = '';
-    if (sessionContainer) sessionContainer.innerHTML = '';
-
-    userSubjects.forEach(sub => {
-        if (taskSelect) {
-            const opt = document.createElement('option');
-            opt.value = sub;
-            opt.textContent = sub;
-            taskSelect.appendChild(opt);
-        }
-        if (sessionContainer) {
-            const btn = document.createElement('button');
-            btn.textContent = sub;
-            btn.onclick = () => alert(sub + ' පාඩම් කිරීම ආරම්භ කලා!');
-            sessionContainer.appendChild(btn);
-        }
-    });
-
-    renderChartLegend();
-}
-
-function renderChartLegend() {
-    const legend = document.getElementById('chartLegend');
-    if (!legend) return;
-    legend.innerHTML = '';
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-
-    userSubjects.forEach((sub, idx) => {
-        const item = document.createElement('div');
-        item.style.margin = '5px 0';
-        item.innerHTML = `<span style="background-color: ${colors[idx % colors.length]}; display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:8px;"></span> ${sub}`;
-        legend.appendChild(item);
-    });
-}
-
-function updateWeekNumber() {
-    const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const days = Math.floor((now - startOfYear) / 86400000);
-    const weekNum = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-    const elem = document.getElementById('weekNumber');
-    if (elem) elem.textContent = String(weekNum).padStart(2, '0');
-    
-    const currentDay = now.getDay();
-    document.querySelectorAll('.day').forEach(el => {
-        if (Number(el.dataset.day) === currentDay) el.classList.add('today');
-    });
-}
-
-// Tasks Management
-function renderTasks() {
-    const taskList = document.getElementById('taskList');
-    if (!taskList) return;
-    taskList.innerHTML = '';
-    tasks.forEach((task, idx) => {
-        const div = document.createElement('div');
-        div.className = 'task-item';
-        div.innerHTML = `
-            <div class="task-check ${task.completed ? 'completed' : ''}" onclick="completeTask(${idx})">
-                ${task.completed ? '✓' : ''}
-            </div>
-            <div class="task-text ${task.completed ? 'completed' : ''}">
-                ${task.text} <small style="color:#666;">(${task.subject})</small>
-            </div>
-            <button class="task-delete" onclick="deleteTask(${idx})">✕</button>
-        `;
-        taskList.appendChild(div);
-    });
-}
-
-function addTask() {
-    const input = document.getElementById('taskInput');
-    const subjectSelect = document.getElementById('taskSubject');
-    if (!input || !input.value.trim()) return;
-
-    tasks.push({ text: input.value.trim(), subject: subjectSelect.value, completed: false });
-    localStorage.setItem('studyTasks', JSON.stringify(tasks));
-    renderTasks();
-    input.value = '';
-}
-
-function completeTask(idx) {
-    tasks[idx].completed = !tasks[idx].completed;
-    localStorage.setItem('studyTasks', JSON.stringify(tasks));
-    renderTasks();
-}
-
-function deleteTask(idx) {
-    tasks.splice(idx, 1);
-    localStorage.setItem('studyTasks', JSON.stringify(tasks));
-    renderTasks();
-}
-  
-// Offline PWA Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        const swCode = `
-            const CACHE_NAME = 'stp-dashboard-v1';
-            self.addEventListener('install', e => {
-                e.waitUntil(
-                    caches.open(CACHE_NAME).then(cache => cache.addAll(['./']))
-                );
-            });
-            self.addEventListener('fetch', e => {
-                e.respondWith(
-                    caches.match(e.request).then(response => response || fetch(e.request))
-                );
-            });
-        `;
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl);
-    });
-}
-  
+const _0x4c3929=_0x526d;(function(_0x2840c2,_0x5f327a){const _0x1b9d94=_0x526d,_0x1c51e5=_0x2840c2();while(!![]){try{const _0x38d0fc=-parseInt(_0x1b9d94(0x286))/0x1*(-parseInt(_0x1b9d94(0x292))/0x2)+-parseInt(_0x1b9d94(0x2af))/0x3+parseInt(_0x1b9d94(0x1be))/0x4*(-parseInt(_0x1b9d94(0x2c2))/0x5)+parseInt(_0x1b9d94(0x253))/0x6*(parseInt(_0x1b9d94(0x17d))/0x7)+-parseInt(_0x1b9d94(0x233))/0x8*(-parseInt(_0x1b9d94(0x283))/0x9)+parseInt(_0x1b9d94(0x29f))/0xa*(parseInt(_0x1b9d94(0x236))/0xb)+-parseInt(_0x1b9d94(0x187))/0xc;if(_0x38d0fc===_0x5f327a)break;else _0x1c51e5['push'](_0x1c51e5['shift']());}catch(_0x53665d){_0x1c51e5['push'](_0x1c51e5['shift']());}}}(_0x4eac,0x4f899));let tasks=JSON['parse'](localStorage[_0x4c3929(0x161)]('studyTasks'))||[],studyData=JSON[_0x4c3929(0x1b2)](localStorage['getItem'](_0x4c3929(0x1bf)))||{},selectedStream='',selectedSubjects=[],userSubjects=JSON['parse'](localStorage[_0x4c3929(0x161)](_0x4c3929(0x206)))||[],currentSubject=null,markType='',markSubject='',markData=JSON[_0x4c3929(0x1b2)](localStorage[_0x4c3929(0x161)]('markData'))||{},mrSmileStarted=![],helloTimer=null,startupTimer=null;function revealDashboard(){const _0x2c9ec7=_0x4c3929;mrSmileStarted=!![];helloTimer&&(clearTimeout(helloTimer),helloTimer=null);const _0x23eb94=document[_0x2c9ec7(0x259)](_0x2c9ec7(0x2aa)),_0x33ad59=document[_0x2c9ec7(0x259)](_0x2c9ec7(0x28f)),_0x3a5691=document[_0x2c9ec7(0x259)](_0x2c9ec7(0x1c0)),_0xd08473=document[_0x2c9ec7(0x259)](_0x2c9ec7(0x15f));[_0x23eb94,_0x33ad59][_0x2c9ec7(0x22e)](_0x32634b=>{const _0x3833ed=_0x2c9ec7;if(!_0x32634b)return;_0x32634b[_0x3833ed(0x216)][_0x3833ed(0x25e)]=_0x3833ed(0x27a),_0x32634b[_0x3833ed(0x216)][_0x3833ed(0x18c)]=_0x3833ed(0x19e),_0x32634b[_0x3833ed(0x216)][_0x3833ed(0x27c)]='0',_0x32634b[_0x3833ed(0x216)]['pointerEvents']=_0x3833ed(0x27a);});_0x3a5691&&(_0x3a5691['style']['display']=_0x2c9ec7(0x27a),_0x3a5691[_0x2c9ec7(0x216)]['visibility']='hidden',_0x3a5691[_0x2c9ec7(0x216)][_0x2c9ec7(0x1ed)]='none');_0xd08473&&(_0xd08473[_0x2c9ec7(0x1b0)]['remove'](_0x2c9ec7(0x224),_0x2c9ec7(0x229)),_0xd08473['style'][_0x2c9ec7(0x25e)]=_0x2c9ec7(0x17e),_0xd08473[_0x2c9ec7(0x216)]['visibility']='visible',_0xd08473['style']['opacity']='1',_0xd08473[_0x2c9ec7(0x216)][_0x2c9ec7(0x1ed)]=_0x2c9ec7(0x1fd),_0xd08473['style'][_0x2c9ec7(0x2a3)]='relative',_0xd08473['style']['zIndex']='1');const _0x22e44f=()=>{const _0x1db7d5=_0x2c9ec7;try{loadUserSubjects();}catch(_0x522fb2){console[_0x1db7d5(0x200)](_0x1db7d5(0x1cd),_0x522fb2);}try{renderTasks();}catch(_0x13bbd8){console[_0x1db7d5(0x200)]('tasks:',_0x13bbd8);}try{updatePieChart();}catch(_0x4a2b98){console['error'](_0x1db7d5(0x265),_0x4a2b98);}try{updateWeekNumber();}catch(_0x4fddf6){console[_0x1db7d5(0x200)]('week:',_0x4fddf6);}};if(window[_0x2c9ec7(0x291)])requestAnimationFrame(_0x22e44f);else setTimeout(_0x22e44f,0x0);}function startApp(){const _0x24aa8f=_0x4c3929;try{startupTimer&&(clearTimeout(startupTimer),startupTimer=null);const _0x24b6f6=localStorage['getItem'](_0x24aa8f(0x1c5)),_0x1a8cf3=document[_0x24aa8f(0x259)](_0x24aa8f(0x2aa)),_0x5157fa=document[_0x24aa8f(0x259)](_0x24aa8f(0x28f)),_0x2ee036=document[_0x24aa8f(0x259)](_0x24aa8f(0x1c0)),_0x3ca997=document[_0x24aa8f(0x259)](_0x24aa8f(0x15f));if(_0x1a8cf3)_0x1a8cf3['style'][_0x24aa8f(0x25e)]=_0x24aa8f(0x27a);if(_0x24b6f6)showHello(_0x24b6f6);else{if(_0x5157fa)_0x5157fa[_0x24aa8f(0x216)]['display']=_0x24aa8f(0x27a);if(_0x3ca997)_0x3ca997[_0x24aa8f(0x216)][_0x24aa8f(0x25e)]=_0x24aa8f(0x27a);if(_0x2ee036)_0x2ee036[_0x24aa8f(0x216)][_0x24aa8f(0x25e)]=_0x24aa8f(0x1ba);}}catch(_0x599a4c){console[_0x24aa8f(0x200)](_0x24aa8f(0x274),_0x599a4c),revealDashboard();}}function scheduleStartup(){if(startupTimer)clearTimeout(startupTimer);startupTimer=setTimeout(startApp,0xbb8);}function _0x526d(_0x174743,_0xce7e08){_0x174743=_0x174743-0x15f;const _0x4eac70=_0x4eac();let _0x526d1f=_0x4eac70[_0x174743];return _0x526d1f;}if(document[_0x4c3929(0x2b2)]==='loading')document[_0x4c3929(0x1c2)]('DOMContentLoaded',scheduleStartup,{'once':!![]});else scheduleStartup();setTimeout(()=>{const _0x5c8103=_0x4c3929,_0x2cdf85=localStorage[_0x5c8103(0x161)](_0x5c8103(0x1c5)),_0x4fd9ac=document[_0x5c8103(0x259)](_0x5c8103(0x15f));if(_0x2cdf85&&_0x4fd9ac&&getComputedStyle(_0x4fd9ac)['display']===_0x5c8103(0x27a))revealDashboard();},0x1f40);function showHello(_0x193791){const _0x4aa019=_0x4c3929,_0x444464=document[_0x4aa019(0x259)](_0x4aa019(0x28f)),_0x9221f7=document[_0x4aa019(0x259)](_0x4aa019(0x1a7)),_0xd1a541=document[_0x4aa019(0x259)]('dashboard'),_0x1d2043=document[_0x4aa019(0x259)](_0x4aa019(0x2aa)),_0x5c1ec8=document[_0x4aa019(0x259)](_0x4aa019(0x1c0));if(helloTimer)clearTimeout(helloTimer);if(!_0x444464||!_0xd1a541){revealDashboard();return;}_0x1d2043&&(_0x1d2043[_0x4aa019(0x216)][_0x4aa019(0x25e)]='none',_0x1d2043['style']['visibility']=_0x4aa019(0x19e),_0x1d2043[_0x4aa019(0x216)][_0x4aa019(0x1ed)]=_0x4aa019(0x27a));_0x5c1ec8&&(_0x5c1ec8[_0x4aa019(0x216)][_0x4aa019(0x25e)]=_0x4aa019(0x27a),_0x5c1ec8[_0x4aa019(0x216)][_0x4aa019(0x18c)]=_0x4aa019(0x19e),_0x5c1ec8[_0x4aa019(0x216)][_0x4aa019(0x1ed)]=_0x4aa019(0x27a));_0xd1a541[_0x4aa019(0x216)][_0x4aa019(0x25e)]='none',_0xd1a541[_0x4aa019(0x216)][_0x4aa019(0x18c)]=_0x4aa019(0x19e),_0xd1a541[_0x4aa019(0x216)][_0x4aa019(0x1ed)]=_0x4aa019(0x27a),_0x444464[_0x4aa019(0x216)]['display']=_0x4aa019(0x1ba),_0x444464['style'][_0x4aa019(0x18c)]=_0x4aa019(0x1d5),_0x444464[_0x4aa019(0x216)][_0x4aa019(0x27c)]='1',_0x444464[_0x4aa019(0x216)][_0x4aa019(0x1ed)]=_0x4aa019(0x1fd);if(_0x9221f7)_0x9221f7[_0x4aa019(0x19c)]=_0x193791||'';let _0x1ad4c3=![];const _0x405478=()=>{const _0x4d5b86=_0x4aa019;if(_0x1ad4c3)return;_0x1ad4c3=!![],_0x444464['removeEventListener'](_0x4d5b86(0x21e),_0x405478),revealDashboard();};_0x444464[_0x4aa019(0x1c2)](_0x4aa019(0x21e),_0x405478,{'once':!![]}),helloTimer=setTimeout(_0x405478,0xc80);}function nextFromSlide1(){const _0x1a24ed=_0x4c3929,_0x5f0486=document[_0x1a24ed(0x259)](_0x1a24ed(0x1e4))['value'][_0x1a24ed(0x1e5)](),_0x4610c1=document[_0x1a24ed(0x259)](_0x1a24ed(0x166))[_0x1a24ed(0x231)][_0x1a24ed(0x1e5)](),_0x42fbe4=document[_0x1a24ed(0x259)](_0x1a24ed(0x1e9))[_0x1a24ed(0x231)][_0x1a24ed(0x1e5)](),_0x194887=document['getElementById'](_0x1a24ed(0x194))['value'];if(!_0x5f0486||!_0x4610c1||!_0x42fbe4||!_0x194887){alert(_0x1a24ed(0x1e7));return;}localStorage[_0x1a24ed(0x1ff)](_0x1a24ed(0x1c5),_0x5f0486),localStorage[_0x1a24ed(0x1ff)]('userAge',_0x4610c1),localStorage[_0x1a24ed(0x1ff)](_0x1a24ed(0x297),_0x42fbe4),localStorage[_0x1a24ed(0x1ff)](_0x1a24ed(0x194),_0x194887),_0x194887==='AL'?(document[_0x1a24ed(0x259)](_0x1a24ed(0x2b9))[_0x1a24ed(0x216)][_0x1a24ed(0x25e)]='none',document['getElementById']('setupSlide2')[_0x1a24ed(0x216)][_0x1a24ed(0x25e)]=_0x1a24ed(0x17e)):openOLSubjects();}const olCoreSubjects=['Religion','First\x20Language',_0x4c3929(0x25c),_0x4c3929(0x175),_0x4c3929(0x29e),_0x4c3929(0x18b)],olBasket1=[_0x4c3929(0x163),_0x4c3929(0x1bd),_0x4c3929(0x26d),_0x4c3929(0x16f),_0x4c3929(0x2b0),_0x4c3929(0x284),'German',_0x4c3929(0x298),_0x4c3929(0x241),_0x4c3929(0x235),_0x4c3929(0x299),_0x4c3929(0x17a)],olBasket2=['Music\x20-\x20Eastern',_0x4c3929(0x1a5),_0x4c3929(0x2c1),_0x4c3929(0x270),_0x4c3929(0x279),_0x4c3929(0x21c),_0x4c3929(0x201),_0x4c3929(0x2a2),_0x4c3929(0x1e8),_0x4c3929(0x185),'Literature\x20-\x20Tamil',_0x4c3929(0x254),_0x4c3929(0x25f)],olBasket3=[_0x4c3929(0x1bb),'Agriculture\x20and\x20Food\x20Technology',_0x4c3929(0x1fb),'Design\x20and\x20Technology','Arts\x20and\x20Crafts','Home\x20Economics',_0x4c3929(0x2a6),_0x4c3929(0x178),_0x4c3929(0x2ac)];function openOLSubjects(){const _0x1c4910=_0x4c3929;document[_0x1c4910(0x259)](_0x1c4910(0x2b9))[_0x1c4910(0x216)][_0x1c4910(0x25e)]=_0x1c4910(0x27a),document['getElementById'](_0x1c4910(0x1ce))[_0x1c4910(0x216)][_0x1c4910(0x25e)]=_0x1c4910(0x17e),document['getElementById'](_0x1c4910(0x193))[_0x1c4910(0x1ab)]=_0x1c4910(0x268)+olCoreSubjects['join'](_0x1c4910(0x189)),fillOLSelect('olBasket1',olBasket1),fillOLSelect(_0x1c4910(0x287),olBasket2),fillOLSelect('olBasket3',olBasket3);}function fillOLSelect(_0x9a0e6b,_0x552a6d){const _0x39c46b=_0x4c3929,_0x3b1ebf=document[_0x39c46b(0x259)](_0x9a0e6b);_0x3b1ebf[_0x39c46b(0x1ab)]=_0x39c46b(0x2ae),_0x552a6d[_0x39c46b(0x22e)](_0x202754=>{const _0xee2943=_0x39c46b,_0x1f6aac=document[_0xee2943(0x1e2)](_0xee2943(0x222));_0x1f6aac[_0xee2943(0x231)]=_0x202754,_0x1f6aac[_0xee2943(0x19c)]=_0x202754,_0x3b1ebf[_0xee2943(0x1b8)](_0x1f6aac);});}function finishOLSubjects(){const _0x4e68d3=_0x4c3929,_0x228263=document['getElementById'](_0x4e68d3(0x218))[_0x4e68d3(0x231)],_0x392436=document[_0x4e68d3(0x259)](_0x4e68d3(0x287))[_0x4e68d3(0x231)],_0x550b1b=document[_0x4e68d3(0x259)](_0x4e68d3(0x22d))['value'];if(!_0x228263||!_0x392436||!_0x550b1b){alert(_0x4e68d3(0x17b));return;}userSubjects=[...olCoreSubjects,_0x228263,_0x392436,_0x550b1b],localStorage['setItem']('userSubjects',JSON['stringify'](userSubjects)),document[_0x4e68d3(0x259)](_0x4e68d3(0x1ce))[_0x4e68d3(0x216)][_0x4e68d3(0x25e)]='none',showHello(localStorage['getItem'](_0x4e68d3(0x1c5)));}function backToSlide1FromOL(){const _0x345f80=_0x4c3929;document[_0x345f80(0x259)]('olSubjectSlide')[_0x345f80(0x216)][_0x345f80(0x25e)]=_0x345f80(0x27a),document[_0x345f80(0x259)](_0x345f80(0x2b9))['style'][_0x345f80(0x25e)]=_0x345f80(0x17e);}function selectStream(_0x4854cf){const _0x376d4c=_0x4c3929;selectedStream=_0x4854cf,selectedSubjects=[],document[_0x376d4c(0x259)]('setupSlide2')[_0x376d4c(0x216)][_0x376d4c(0x25e)]='none',document[_0x376d4c(0x259)](_0x376d4c(0x1ca))[_0x376d4c(0x216)][_0x376d4c(0x25e)]='block',showSubjects(_0x4854cf);}function showSubjects(_0x5621a1){const _0x39ec16=_0x4c3929,_0xbf0a38=document['getElementById'](_0x39ec16(0x29d));_0xbf0a38[_0x39ec16(0x1ab)]='';let _0x11fc68=[];if(_0x5621a1===_0x39ec16(0x270))_0x11fc68=['Economics',_0x39ec16(0x168),_0x39ec16(0x163),_0x39ec16(0x2bb),_0x39ec16(0x18b),_0x39ec16(0x288),_0x39ec16(0x227),'English\x20Literature',_0x39ec16(0x248),_0x39ec16(0x1c6),_0x39ec16(0x257),_0x39ec16(0x251),_0x39ec16(0x192),_0x39ec16(0x16b),'Hindu\x20Civilization\x20/\x20Hinduism',_0x39ec16(0x204),_0x39ec16(0x2c0),'Drama\x20and\x20Theatre',_0x39ec16(0x1ec)];else{if(_0x5621a1===_0x39ec16(0x181))_0x11fc68=['Combined\x20Mathematics','Physics','Chemistry','ICT'];else{if(_0x5621a1===_0x39ec16(0x256))_0x11fc68=[_0x39ec16(0x262),_0x39ec16(0x177),'Chemistry','Agricultural\x20Science',_0x39ec16(0x234)];else{if(_0x5621a1==='Technology')_0x11fc68=[_0x39ec16(0x25b),'Engineering\x20Technology\x20(ET)',_0x39ec16(0x1c7),_0x39ec16(0x1c9),_0x39ec16(0x2b8),_0x39ec16(0x163),_0x39ec16(0x2bd),_0x39ec16(0x2b1),_0x39ec16(0x27e),_0x39ec16(0x1fa),_0x39ec16(0x1bc),_0x39ec16(0x28c)];else _0x5621a1===_0x39ec16(0x20e)&&(_0x11fc68=['Accounting',_0x39ec16(0x1ae),'Economics',_0x39ec16(0x21b),'ICT']);}}}_0x11fc68['forEach'](_0xdef317=>{const _0x3cb820=_0x39ec16,_0x1e1568=document['createElement'](_0x3cb820(0x26f));_0x1e1568[_0x3cb820(0x19c)]=_0xdef317,_0x1e1568[_0x3cb820(0x1f6)]=()=>{toggleSubject(_0x1e1568,_0xdef317);},_0xbf0a38[_0x3cb820(0x1b8)](_0x1e1568);});}function toggleSubject(_0x7bca19,_0x194f59){const _0xfe6cee=_0x4c3929;if(selectedSubjects[_0xfe6cee(0x2ad)](_0x194f59)){selectedSubjects=selectedSubjects['filter'](_0x135b50=>_0x135b50!==_0x194f59),_0x7bca19[_0xfe6cee(0x1b0)][_0xfe6cee(0x2c6)]('selected');return;}if(selectedSubjects[_0xfe6cee(0x282)]>=0x3)return;selectedSubjects[_0xfe6cee(0x19d)](_0x194f59),_0x7bca19[_0xfe6cee(0x1b0)][_0xfe6cee(0x1d8)](_0xfe6cee(0x214));}function finishSubjects(){const _0x568a3e=_0x4c3929;if(selectedSubjects[_0x568a3e(0x282)]!==0x3){alert(_0x568a3e(0x21d));return;}userSubjects=[...selectedSubjects],localStorage[_0x568a3e(0x1ff)]('userSubjects',JSON[_0x568a3e(0x293)](userSubjects)),document[_0x568a3e(0x259)](_0x568a3e(0x1ca))['style'][_0x568a3e(0x25e)]='none',showHello(localStorage[_0x568a3e(0x161)](_0x568a3e(0x1c5)));}function backToSlide1(){const _0x1fa36b=_0x4c3929;document[_0x1fa36b(0x259)](_0x1fa36b(0x285))[_0x1fa36b(0x216)]['display']=_0x1fa36b(0x27a),document[_0x1fa36b(0x259)](_0x1fa36b(0x2b9))[_0x1fa36b(0x216)][_0x1fa36b(0x25e)]=_0x1fa36b(0x17e);}function backToSlide2(){const _0x6c5031=_0x4c3929;document['getElementById'](_0x6c5031(0x1ca))[_0x6c5031(0x216)][_0x6c5031(0x25e)]=_0x6c5031(0x27a),document['getElementById'](_0x6c5031(0x285))[_0x6c5031(0x216)]['display']=_0x6c5031(0x17e);}function loadUserSubjects(){const _0x22dc3d=_0x4c3929;userSubjects=JSON[_0x22dc3d(0x1b2)](localStorage[_0x22dc3d(0x161)](_0x22dc3d(0x206)))||[];if(!userSubjects[_0x22dc3d(0x282)])return;const _0x1021fd=document[_0x22dc3d(0x259)](_0x22dc3d(0x22a));_0x1021fd['innerHTML']='',userSubjects['forEach'](_0x58e083=>{const _0x4a80fe=_0x22dc3d,_0x21bc73=document['createElement'](_0x4a80fe(0x222));_0x21bc73[_0x4a80fe(0x231)]=_0x58e083,_0x21bc73['textContent']=_0x58e083,_0x1021fd[_0x4a80fe(0x1b8)](_0x21bc73);});const _0x5c07e7=document[_0x22dc3d(0x259)]('sessionSubjects');_0x5c07e7['innerHTML']='',userSubjects[_0x22dc3d(0x22e)](_0x198f78=>{const _0x1021ea=_0x22dc3d,_0x48ebb9=document[_0x1021ea(0x1e2)](_0x1021ea(0x26f));_0x48ebb9['textContent']=_0x198f78,_0x48ebb9[_0x1021ea(0x1f6)]=()=>{startWithSubject(_0x198f78);},_0x5c07e7[_0x1021ea(0x1b8)](_0x48ebb9);}),renderChartLegend();}function renderChartLegend(){const _0x52283=_0x4c3929,_0x3e7524=document['getElementById'](_0x52283(0x290));_0x3e7524[_0x52283(0x1ab)]='',userSubjects['forEach']((_0x4136de,_0x4df724)=>{const _0x56470b=_0x52283,_0x1b6856=[_0x56470b(0x219),_0x56470b(0x1ad),_0x56470b(0x164),_0x56470b(0x17f),_0x56470b(0x212),'#a34cff',_0x56470b(0x16a),_0x56470b(0x1cb),_0x56470b(0x188)],_0x52fc89=document[_0x56470b(0x1e2)](_0x56470b(0x26a));_0x52fc89[_0x56470b(0x1ab)]=_0x56470b(0x167)+_0x1b6856[_0x4df724%_0x1b6856[_0x56470b(0x282)]]+';\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20></span>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x4136de+'\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20',_0x3e7524[_0x56470b(0x1b8)](_0x52fc89);});}const dayNames=[_0x4c3929(0x24d),_0x4c3929(0x26e),_0x4c3929(0x239),_0x4c3929(0x211),_0x4c3929(0x23d),_0x4c3929(0x203),_0x4c3929(0x29b)];function setupCurrentDay(){const _0x2ce47f=_0x4c3929,_0x5094d9=new Date()['getDay']();document['querySelectorAll'](_0x2ce47f(0x1de))[_0x2ce47f(0x22e)](_0x56fe18=>{const _0xe56e0a=_0x2ce47f;_0x56fe18['classList'][_0xe56e0a(0x2c6)]('today'),Number(_0x56fe18['dataset'][_0xe56e0a(0x1b6)])===_0x5094d9&&_0x56fe18[_0xe56e0a(0x1b0)][_0xe56e0a(0x1d8)](_0xe56e0a(0x19a));});}function updateWeekNumber(){const _0x1278f9=_0x4c3929,_0x10785b=new Date(),_0x192954=new Date(_0x10785b[_0x1278f9(0x1dc)](),0x0,0x1),_0x21456f=Math['floor']((_0x10785b-_0x192954)/0x5265c00),_0x1d42cc=Math[_0x1278f9(0x2a1)]((_0x21456f+_0x192954[_0x1278f9(0x23b)]()+0x1)/0x7);document[_0x1278f9(0x259)](_0x1278f9(0x2c4))[_0x1278f9(0x19c)]=String(_0x1d42cc)[_0x1278f9(0x180)](0x2,'0');}setupCurrentDay(),updateWeekNumber(),document[_0x4c3929(0x196)]('.day')[_0x4c3929(0x22e)](_0x55cd11=>{const _0x554c4b=_0x4c3929;_0x55cd11[_0x554c4b(0x1c2)]('contextmenu',function(_0xb69812){const _0x311c3b=_0x554c4b;_0xb69812['preventDefault'](),showDayPopup(Number(this[_0x311c3b(0x225)]['day']));});});function showDayPopup(_0x4b3dd5){const _0x2a151d=_0x4c3929,_0x4922e0=studyData[_0x4b3dd5]?.['total']||0x0,_0x4af316=studyData[_0x4b3dd5]?.['sessions']||0x0;let _0x3afe61=0x0;for(let _0x30a052=0x0;_0x30a052<0x7;_0x30a052++){_0x3afe61+=studyData[_0x30a052]?.[_0x2a151d(0x26c)]||0x0;}const _0x13615c=_0x3afe61/0x7;document[_0x2a151d(0x259)]('popupDayTitle')[_0x2a151d(0x19c)]=dayNames[_0x4b3dd5],document[_0x2a151d(0x259)](_0x2a151d(0x1fc))[_0x2a151d(0x19c)]=formatHours(_0x4922e0),document[_0x2a151d(0x259)](_0x2a151d(0x1a4))[_0x2a151d(0x19c)]=_0x4af316,document[_0x2a151d(0x259)](_0x2a151d(0x1d0))['textContent']=formatHours(_0x3afe61),document[_0x2a151d(0x259)](_0x2a151d(0x1a3))['textContent']=formatHours(_0x13615c),document[_0x2a151d(0x259)](_0x2a151d(0x2b3))[_0x2a151d(0x216)][_0x2a151d(0x25e)]=_0x2a151d(0x1ba);}function formatHours(_0x1faf18){const _0x4a5319=_0x4c3929,_0x184cf0=Math[_0x4a5319(0x1e0)](_0x1faf18/0xe10),_0x346392=Math[_0x4a5319(0x1e0)](_0x1faf18%0xe10/0x3c);return _0x184cf0+'h\x20'+_0x346392+'m';}function saveTasks(){const _0x291473=_0x4c3929;localStorage[_0x291473(0x1ff)](_0x291473(0x24f),JSON['stringify'](tasks));}function renderTasks(){const _0x6c3b4c=_0x4c3929,_0x199781=document[_0x6c3b4c(0x259)](_0x6c3b4c(0x271));_0x199781[_0x6c3b4c(0x1ab)]='',tasks[_0x6c3b4c(0x22e)]((_0x44ced1,_0x4eefaf)=>{const _0x203328=_0x6c3b4c,_0x163597=document[_0x203328(0x1e2)]('div');_0x163597[_0x203328(0x2a7)]=_0x203328(0x202),_0x163597[_0x203328(0x1ab)]='\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20class=\x22task-check\x20'+(_0x44ced1[_0x203328(0x1d2)]?_0x203328(0x1d2):'')+_0x203328(0x29a)+_0x4eefaf+_0x203328(0x226)+(_0x44ced1[_0x203328(0x1d2)]?'✓':'')+_0x203328(0x165)+(_0x44ced1['completed']?_0x203328(0x1d2):'')+_0x203328(0x1cf)+_0x44ced1[_0x203328(0x1ea)]+_0x203328(0x198)+_0x44ced1[_0x203328(0x169)]+_0x203328(0x2c3)+_0x4eefaf+')\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20✕\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</button>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20',_0x199781[_0x203328(0x1b8)](_0x163597);});}function addTask(){const _0x1604a8=_0x4c3929,_0x154f6d=document[_0x1604a8(0x259)]('taskInput'),_0x10ef76=document[_0x1604a8(0x259)](_0x1604a8(0x22a)),_0x5c475f=_0x154f6d[_0x1604a8(0x231)]['trim']();if(!_0x5c475f)return;tasks[_0x1604a8(0x19d)]({'text':_0x5c475f,'subject':_0x10ef76['value'],'completed':![]}),saveTasks(),renderTasks(),_0x154f6d[_0x1604a8(0x231)]='';}function completeTask(_0x462133){const _0x3cefc9=_0x4c3929;tasks[_0x462133][_0x3cefc9(0x1d2)]=!tasks[_0x462133][_0x3cefc9(0x1d2)],saveTasks(),renderTasks();}function deleteTask(_0x3b7ea3){const _0x3597b8=_0x4c3929;tasks[_0x3597b8(0x244)](_0x3b7ea3,0x1),saveTasks(),renderTasks();}document[_0x4c3929(0x259)](_0x4c3929(0x271))[_0x4c3929(0x1c2)](_0x4c3929(0x2be),function(_0x27f57a){const _0xe571f=_0x4c3929;_0x27f57a[_0xe571f(0x24e)]();}),renderTasks();let pomodoroSeconds=0x19*0x3c,pomodoroInterval=null;function updatePomodoro(){const _0x29573b=_0x4c3929,_0x277cf0=Math[_0x29573b(0x1e0)](pomodoroSeconds/0x3c),_0x348d98=pomodoroSeconds%0x3c,_0x5d1d25=String(_0x277cf0)[_0x29573b(0x180)](0x2,'0')+':'+String(_0x348d98)[_0x29573b(0x180)](0x2,'0');document[_0x29573b(0x259)]('pomodoroDisplay')[_0x29573b(0x19c)]=_0x5d1d25,document[_0x29573b(0x259)](_0x29573b(0x25d))[_0x29573b(0x19c)]=_0x5d1d25;}function startPomodoro(){if(pomodoroInterval)return;pomodoroInterval=setInterval(()=>{const _0x1f12e5=_0x526d;pomodoroSeconds>0x0?(pomodoroSeconds--,updatePomodoro()):(pausePomodoro(),playTimerSound(),showTimerFinishPopup(_0x1f12e5(0x263),_0x1f12e5(0x2bc)));},0x3e8);}function pausePomodoro(){clearInterval(pomodoroInterval),pomodoroInterval=null;}function resetPomodoro(){pausePomodoro(),pomodoroSeconds=0x19*0x3c,updatePomodoro();}document['querySelector'](_0x4c3929(0x172))[_0x4c3929(0x1c2)](_0x4c3929(0x2be),function(_0x2f43dd){const _0x1a5174=_0x4c3929;_0x2f43dd[_0x1a5174(0x24e)](),document[_0x1a5174(0x259)](_0x1a5174(0x162))[_0x1a5174(0x19c)]=_0x1a5174(0x1f7),document[_0x1a5174(0x259)](_0x1a5174(0x238))[_0x1a5174(0x216)][_0x1a5174(0x25e)]=_0x1a5174(0x1ba),updatePomodoro();});let customSeconds=0x0,customInterval=null;function updateCustomDisplay(){const _0x24c6a2=_0x4c3929,_0x10a599=Math[_0x24c6a2(0x1e0)](customSeconds/0xe10),_0x408fe8=Math['floor'](customSeconds%0xe10/0x3c),_0x39949e=customSeconds%0x3c,_0x227f8c=String(_0x10a599)[_0x24c6a2(0x180)](0x2,'0')+':'+String(_0x408fe8)[_0x24c6a2(0x180)](0x2,'0')+':'+String(_0x39949e)[_0x24c6a2(0x180)](0x2,'0');document['getElementById']('customDisplay')[_0x24c6a2(0x19c)]=_0x227f8c,document[_0x24c6a2(0x259)](_0x24c6a2(0x25d))[_0x24c6a2(0x19c)]=_0x227f8c;}function setCustomTimer(){const _0x43fbee=_0x4c3929,_0x438fd2=Number(document['getElementById'](_0x43fbee(0x1db))[_0x43fbee(0x231)])||0x0,_0x526776=Number(document[_0x43fbee(0x259)](_0x43fbee(0x217))[_0x43fbee(0x231)])||0x0,_0x44dd95=Number(document[_0x43fbee(0x259)]('customSeconds')[_0x43fbee(0x231)])||0x0;customSeconds=_0x438fd2*0xe10+_0x526776*0x3c+_0x44dd95,updateCustomDisplay();}function startCustomTimer(){if(customInterval)return;if(customSeconds<=0x0)return;customInterval=setInterval(()=>{const _0x28b656=_0x526d;customSeconds>0x0?(customSeconds--,updateCustomDisplay()):(pauseCustomTimer(),playTimerSound(),showTimerFinishPopup(_0x28b656(0x1c8),_0x28b656(0x261)));},0x3e8);}function pauseCustomTimer(){clearInterval(customInterval),customInterval=null;}function resetCustomTimer(){pauseCustomTimer(),customSeconds=0x0,updateCustomDisplay();}const customTimerCard=document['querySelectorAll']('.timer-card')[0x1];customTimerCard['addEventListener'](_0x4c3929(0x2be),function(_0xf89879){const _0x10ea21=_0x4c3929;_0xf89879[_0x10ea21(0x24e)](),document[_0x10ea21(0x259)]('fullscreenTimerTitle')['textContent']=_0x10ea21(0x280),document[_0x10ea21(0x259)](_0x10ea21(0x238))[_0x10ea21(0x216)][_0x10ea21(0x25e)]='flex',updateCustomDisplay();});function playTimerSound(){const _0x5c1faa=_0x4c3929;try{const _0x70e8a4=window['AudioContext']||window['webkitAudioContext'],_0x3b66bc=new _0x70e8a4(),_0x341aed=_0x3b66bc[_0x5c1faa(0x2a8)],_0x3ad916=_0x3b66bc[_0x5c1faa(0x19f)](),_0x34c7aa=_0x3b66bc[_0x5c1faa(0x1aa)]();_0x3ad916[_0x5c1faa(0x20b)]='sine',_0x3ad916[_0x5c1faa(0x242)][_0x5c1faa(0x1e1)](0x294,_0x341aed),_0x3ad916[_0x5c1faa(0x242)]['setValueAtTime'](0x370,_0x341aed+0.18),_0x3ad916[_0x5c1faa(0x242)][_0x5c1faa(0x1e1)](0x294,_0x341aed+0.36),_0x34c7aa[_0x5c1faa(0x25a)][_0x5c1faa(0x1e1)](0.001,_0x341aed),_0x34c7aa[_0x5c1faa(0x25a)]['exponentialRampToValueAtTime'](0.25,_0x341aed+0.03),_0x34c7aa[_0x5c1faa(0x25a)][_0x5c1faa(0x272)](0.001,_0x341aed+0.55),_0x3ad916[_0x5c1faa(0x1d4)](_0x34c7aa),_0x34c7aa[_0x5c1faa(0x1d4)](_0x3b66bc[_0x5c1faa(0x1f9)]),_0x3ad916[_0x5c1faa(0x220)](_0x341aed),_0x3ad916[_0x5c1faa(0x205)](_0x341aed+0.6);}catch(_0x11d883){console[_0x5c1faa(0x275)](_0x5c1faa(0x1d9));}}function showTimerFinishPopup(_0x4d13f2,_0x27954b){const _0x13c847=_0x4c3929;document[_0x13c847(0x259)]('timerFinishTitle')[_0x13c847(0x19c)]=_0x4d13f2,document[_0x13c847(0x259)](_0x13c847(0x1d7))[_0x13c847(0x19c)]=_0x27954b,document[_0x13c847(0x259)](_0x13c847(0x273))[_0x13c847(0x216)][_0x13c847(0x25e)]=_0x13c847(0x1ba);}function closeTimerFinishPopup(){const _0x3f9df3=_0x4c3929;document[_0x3f9df3(0x259)](_0x3f9df3(0x273))['style'][_0x3f9df3(0x25e)]='none';}let sessionInterval=null,sessionSeconds=0x0,sessionStart=null;function updateSessionDisplay(){const _0x3b0bcb=_0x4c3929,_0x202e05=Math[_0x3b0bcb(0x1e0)](sessionSeconds/0xe10),_0x4ec46d=Math[_0x3b0bcb(0x1e0)](sessionSeconds%0xe10/0x3c),_0x4777bc=sessionSeconds%0x3c;document[_0x3b0bcb(0x259)](_0x3b0bcb(0x24c))[_0x3b0bcb(0x19c)]=String(_0x202e05)[_0x3b0bcb(0x180)](0x2,'0')+':'+String(_0x4ec46d)[_0x3b0bcb(0x180)](0x2,'0')+':'+String(_0x4777bc)[_0x3b0bcb(0x180)](0x2,'0');}function openSubjectPopup(){const _0x460250=_0x4c3929;loadUserSubjects(),document[_0x460250(0x259)](_0x460250(0x29c))[_0x460250(0x216)][_0x460250(0x25e)]='flex';}function closeSubjectPopup(){const _0x23e5f3=_0x4c3929;document[_0x23e5f3(0x259)](_0x23e5f3(0x29c))[_0x23e5f3(0x216)][_0x23e5f3(0x25e)]=_0x23e5f3(0x27a);}function startWithSubject(_0x23bec6){closeSubjectPopup(),currentSubject=_0x23bec6,startSession();}function startSession(){const _0x545cc2=_0x4c3929;if(sessionInterval)return;sessionStart=Date[_0x545cc2(0x230)](),document[_0x545cc2(0x259)](_0x545cc2(0x18d))['textContent']='Studying',sessionInterval=setInterval(()=>{sessionSeconds++,updateSessionDisplay();},0x3e8);}function endSession(){const _0x58ec96=_0x4c3929;if(!sessionInterval)return;clearInterval(sessionInterval),sessionInterval=null;const _0x1b34c2=new Date()[_0x58ec96(0x23b)]();!studyData[_0x1b34c2]&&(studyData[_0x1b34c2]={'total':0x0,'sessions':0x0,'subjects':{}}),!studyData[_0x1b34c2][_0x58ec96(0x264)]&&(studyData[_0x1b34c2]['subjects']={}),studyData[_0x1b34c2][_0x58ec96(0x26c)]+=sessionSeconds,studyData[_0x1b34c2][_0x58ec96(0x1eb)]++,studyData[_0x1b34c2]['subjects'][currentSubject]=(studyData[_0x1b34c2]['subjects'][currentSubject]||0x0)+sessionSeconds,localStorage[_0x58ec96(0x1ff)](_0x58ec96(0x1bf),JSON[_0x58ec96(0x293)](studyData)),sessionSeconds=0x0,updateSessionDisplay(),document[_0x58ec96(0x259)](_0x58ec96(0x18d))[_0x58ec96(0x19c)]=_0x58ec96(0x278),updatePieChart();}document[_0x4c3929(0x2c5)](_0x4c3929(0x1df))[_0x4c3929(0x1c2)](_0x4c3929(0x2be),function(_0x5177c4){const _0x2e1b2a=_0x4c3929;_0x5177c4[_0x2e1b2a(0x24e)](),document[_0x2e1b2a(0x259)](_0x2e1b2a(0x162))[_0x2e1b2a(0x19c)]=_0x2e1b2a(0x2b7),document[_0x2e1b2a(0x259)](_0x2e1b2a(0x238))[_0x2e1b2a(0x216)]['display']=_0x2e1b2a(0x1ba),document[_0x2e1b2a(0x259)](_0x2e1b2a(0x25d))[_0x2e1b2a(0x19c)]=document[_0x2e1b2a(0x259)]('sessionDisplay')[_0x2e1b2a(0x19c)];});function updatePieChart(){const _0x12aa69=_0x4c3929,_0x4b4dd1=new Date()[_0x12aa69(0x23b)](),_0x2554ac=studyData[_0x4b4dd1]?.[_0x12aa69(0x264)]||{};let _0x1a70e4=0x0;userSubjects[_0x12aa69(0x22e)](_0x137574=>{_0x1a70e4+=_0x2554ac[_0x137574]||0x0;});const _0x12f4b1=document['getElementById']('pieChart');if(_0x1a70e4===0x0){_0x12f4b1[_0x12aa69(0x216)][_0x12aa69(0x277)]=_0x12aa69(0x296);return;}const _0x2343b3=[_0x12aa69(0x219),_0x12aa69(0x1ad),_0x12aa69(0x164),'#ffb13b',_0x12aa69(0x212),_0x12aa69(0x1cc),_0x12aa69(0x16a),_0x12aa69(0x1cb),_0x12aa69(0x188)];let _0x492ebd=0x0,_0x2670e0=[];userSubjects['forEach']((_0x4b91ff,_0x5ca3b2)=>{const _0x445fe4=_0x12aa69,_0x2eabbf=_0x2554ac[_0x4b91ff]||0x0;if(_0x2eabbf<=0x0)return;const _0x132f2a=_0x2eabbf/_0x1a70e4*0x168,_0x24ff81=_0x492ebd+_0x132f2a;_0x2670e0[_0x445fe4(0x19d)](_0x2343b3[_0x5ca3b2%_0x2343b3[_0x445fe4(0x282)]]+'\x20'+_0x492ebd+_0x445fe4(0x1a0)+_0x24ff81+_0x445fe4(0x16e)),_0x492ebd=_0x24ff81;}),_0x12f4b1[_0x12aa69(0x216)][_0x12aa69(0x277)]=_0x12aa69(0x1f1)+_0x2670e0[_0x12aa69(0x1a2)](',')+')';}document[_0x4c3929(0x259)](_0x4c3929(0x160))[_0x4c3929(0x1c2)](_0x4c3929(0x2be),function(_0xaf2bba){const _0x269c01=_0x4c3929;_0xaf2bba[_0x269c01(0x24e)](),openPieFullscreen();});function openPieFullscreen(){const _0x5b7200=_0x4c3929,_0x148f5b=document['getElementById'](_0x5b7200(0x249)),_0x22df96=_0x148f5b[_0x5b7200(0x2c5)](_0x5b7200(0x1a1));_0x22df96[_0x5b7200(0x1ab)]=_0x5b7200(0x240);const _0x3f0db7=new Date()[_0x5b7200(0x23b)](),_0x3ffb55=studyData[_0x3f0db7]?.['subjects']||{};let _0x35f562=0x0;userSubjects[_0x5b7200(0x22e)](_0x2da938=>{_0x35f562+=_0x3ffb55[_0x2da938]||0x0;});const _0x5a07bb=[_0x5b7200(0x219),_0x5b7200(0x1ad),_0x5b7200(0x164),_0x5b7200(0x17f),_0x5b7200(0x212),_0x5b7200(0x1cc),'#f59e0b',_0x5b7200(0x1cb),'#fb7185'];let _0x5efdea=0x0,_0x2dadad=[],_0x43c870='';userSubjects[_0x5b7200(0x22e)]((_0xe7025,_0x192a88)=>{const _0x40686f=_0x5b7200,_0x4aecb0=_0x3ffb55[_0xe7025]||0x0;if(_0x35f562>0x0){const _0x3ea229=_0x4aecb0/_0x35f562*0x168,_0x5b8a07=_0x5efdea+_0x3ea229;_0x2dadad[_0x40686f(0x19d)](_0x5a07bb[_0x192a88%_0x5a07bb[_0x40686f(0x282)]]+'\x20'+_0x5efdea+_0x40686f(0x1a0)+_0x5b8a07+_0x40686f(0x16e)),_0x5efdea=_0x5b8a07;}const _0x3666db=Math[_0x40686f(0x1e0)](_0x4aecb0/0x3c);_0x43c870+='\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:12px\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-bottom:1px\x20solid\x20#29334d;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:flex;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20justify-content:space-between;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20gap:15px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:inline-block;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:12px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:12px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:3px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:'+_0x5a07bb[_0x192a88%_0x5a07bb['length']]+_0x40686f(0x27b)+_0xe7025+_0x40686f(0x16c)+_0x3666db+_0x40686f(0x1c4);});const _0x212efe=document[_0x5b7200(0x259)](_0x5b7200(0x209));_0x212efe[_0x5b7200(0x216)][_0x5b7200(0x277)]=_0x35f562>0x0?'conic-gradient('+_0x2dadad[_0x5b7200(0x1a2)](',')+')':_0x5b7200(0x296),document[_0x5b7200(0x259)](_0x5b7200(0x173))[_0x5b7200(0x1ab)]=_0x43c870,_0x148f5b[_0x5b7200(0x216)][_0x5b7200(0x25e)]=_0x5b7200(0x1ba);}function closePopup(_0x244e26){const _0x3029b7=_0x4c3929;document['getElementById'](_0x244e26)['style'][_0x3029b7(0x25e)]=_0x3029b7(0x27a);}function openResetPopup(){const _0x586096=_0x4c3929;document[_0x586096(0x259)]('resetPopup')['style'][_0x586096(0x25e)]=_0x586096(0x1ba);}function closeResetPopup(){const _0xae173b=_0x4c3929;document[_0xae173b(0x259)](_0xae173b(0x1a9))[_0xae173b(0x216)][_0xae173b(0x25e)]=_0xae173b(0x27a);}function confirmResetData(){const _0x2afd6a=_0x4c3929;localStorage[_0x2afd6a(0x1b9)](_0x2afd6a(0x1bf)),studyData={},sessionInterval&&(clearInterval(sessionInterval),sessionInterval=null),sessionSeconds=0x0,currentSubject=null,updateSessionDisplay(),document[_0x2afd6a(0x259)]('sessionStatus')[_0x2afd6a(0x19c)]='Idle',updatePieChart(),closeResetPopup();}function openMarkAnalyze(){openMarkTypePopup();}function openMarkTypePopup(){const _0x5182af=_0x4c3929;document[_0x5182af(0x259)](_0x5182af(0x2a4))[_0x5182af(0x216)][_0x5182af(0x25e)]='flex';}function chooseMarkType(_0x1a3f14){const _0x238619=_0x4c3929;markType=_0x1a3f14,closePopup(_0x238619(0x2a4)),openMarkSubjectPopup();}function openMarkSubjectPopup(){const _0x309163=_0x4c3929,_0x335edc=document[_0x309163(0x259)](_0x309163(0x289));_0x335edc[_0x309163(0x1ab)]='',userSubjects[_0x309163(0x22e)](_0x506b9b=>{const _0x35e04c=_0x309163,_0x23f2e1=document[_0x35e04c(0x1e2)](_0x35e04c(0x26f));_0x23f2e1[_0x35e04c(0x2a7)]='mark-subject-btn',_0x23f2e1[_0x35e04c(0x19c)]=_0x506b9b,_0x23f2e1[_0x35e04c(0x1f6)]=()=>{chooseMarkSubject(_0x506b9b);},_0x335edc[_0x35e04c(0x1b8)](_0x23f2e1);}),document['getElementById'](_0x309163(0x2a5))[_0x309163(0x216)][_0x309163(0x25e)]=_0x309163(0x1ba);}function chooseMarkSubject(_0x19ef44){const _0x28b24c=_0x4c3929;markSubject=_0x19ef44,closePopup(_0x28b24c(0x2a5)),document[_0x28b24c(0x259)](_0x28b24c(0x1ef))['textContent']=_0x19ef44,document[_0x28b24c(0x259)](_0x28b24c(0x27d))['style'][_0x28b24c(0x25e)]=_0x28b24c(0x1ba);}function openAddMarks(){const _0x2f956f=_0x4c3929;closePopup(_0x2f956f(0x27d)),document['getElementById'](_0x2f956f(0x174))[_0x2f956f(0x231)]='',document['getElementById'](_0x2f956f(0x1a8))[_0x2f956f(0x231)]='',document[_0x2f956f(0x259)](_0x2f956f(0x1d1))[_0x2f956f(0x231)]='',document[_0x2f956f(0x259)](_0x2f956f(0x295))[_0x2f956f(0x216)][_0x2f956f(0x25e)]=_0x2f956f(0x1ba);}function openDisplayAnalyze(){const _0x5dde95=_0x4c3929;closePopup(_0x5dde95(0x27d)),showMarkAnalysis();}function saveMark(){const _0x3e3c9e=_0x4c3929,_0x2f9795=document[_0x3e3c9e(0x259)](_0x3e3c9e(0x174))[_0x3e3c9e(0x231)]['trim'](),_0x576106=Number(document[_0x3e3c9e(0x259)](_0x3e3c9e(0x1a8))[_0x3e3c9e(0x231)]),_0x2f7f61=Number(document[_0x3e3c9e(0x259)](_0x3e3c9e(0x1d1))['value']);if(!_0x2f9795||isNaN(_0x576106)||isNaN(_0x2f7f61))return;const _0x409230=_0x576106+_0x2f7f61;!markData[markSubject]&&(markData[markSubject]=[]),markData[markSubject][_0x3e3c9e(0x19d)]({'type':markType,'paper':_0x2f9795,'part1':_0x576106,'part2':_0x2f7f61,'total':_0x409230,'date':new Date()[_0x3e3c9e(0x1f4)]()}),localStorage['setItem'](_0x3e3c9e(0x1fe),JSON[_0x3e3c9e(0x293)](markData)),closePopup(_0x3e3c9e(0x295)),document[_0x3e3c9e(0x259)]('dashboard')[_0x3e3c9e(0x216)]['display']=_0x3e3c9e(0x17e);}document['querySelector'](_0x4c3929(0x21a))[_0x4c3929(0x1c2)]('contextmenu',function(_0x5aa20b){const _0x27e029=_0x4c3929;_0x5aa20b[_0x27e029(0x24e)](),openMarkAnalyze();});function _0x4eac(){const _0x1c48eb=['part1Marks','resetPopup','createGain','innerHTML','paper','#ff6b81','Business\x20Studies','<div\x20class=\x22mark-empty\x22>No\x20','classList','key','parse','colorAccent','part2','1st\x20Part','day','toggle','appendChild','removeItem','flex','Information\x20Technology','Agricultural\x20Science','Citizenship\x20Education','10060zDrYCa','studyData','setup','</strong>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20style=\x22float:right;color:#59647a;\x22>','addEventListener','center','\x20min\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</strong>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','userName','Tamil\x20Literature','Bio-System\x20Technology\x20(BST)','Custom\x20Timer\x20Completed!\x20🎉','Information\x20&\x20Communication\x20Technology\x20(ICT)','setupSlide3','#22d3ee','#a34cff','subjects:','olSubjectSlide','\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','weeklyTotal','part2Marks','completed','lineWidth','connect','visible','animationDelay','timerFinishMessage','add','Audio\x20unavailable.','studyTheme','customHours','getFullYear','fillStyle','.day','.session-card','floor','setValueAtTime','createElement','color','name','trim','#29334d','Please\x20fill\x20in\x20all\x20details.','Drama\x20and\x20Theatre\x20-\x20English','school','text','sessions','Art\x20/\x20Visual\x20Arts','pointerEvents','2nd\x20Part','markActionSubject','clientX','conic-gradient(','documentElement','beginPath','toLocaleDateString','width','onclick','Pomodoro','\x20yet.<br><br>Click\x20<b>Add\x20Marks</b>\x20to\x20add\x20one.</div>','destination','Accountancy','Fisheries\x20and\x20Food\x20Technology','popupDayHours','auto','markData','setItem','error','Drama\x20and\x20Theatre\x20-\x20Sinhala','task-item','Friday','Dancing','stop','userSubjects','--theme-bg','setProperty','bigPieChart','fillText','type','filter','#8991a6','Commerce','--theme-accent','map','Wednesday','#7357ff','resize','selected','stroke','style','customMinutes','olBasket1','#48d7ff','.analyze-button','Business\x20Statistics','Dancing\x20-\x20Indian','Please\x20select\x20exactly\x203\x20subjects.','animationend','cos','start','moveTo','option','colorSuccess','mobile-left-open','dataset',')\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','Mass\x20Communication','INPUT','mobile-right-open','taskSubject','dashName','lineTo','olBasket3','forEach','input','now','value','markDetails','4384664TfvqEN','ICT','Arabic','11FvKONo','setTransform','timerPopup','Tuesday','--theme-input','getDay','label','Thursday','--x','random','\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20<button\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20class=\x22close-popup\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onclick=\x22closePopup(\x27markAnalysisPopup\x27)\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20✕\x0a\x20\x20\x20\x20\x20\x20\x20\x20</button>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20<h1>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20📊\x20Today\x27s\x20Study\x20Distribution\x0a\x20\x20\x20\x20\x20\x20\x20\x20</h1>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:flex;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20align-items:center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20gap:35px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20flex-wrap:wrap;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20id=\x22bigPieChart\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:350px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:350px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:50%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20flex-shrink:0;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20></div>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20id=\x22bigPieDetails\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20flex:1;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20min-width:230px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20></div>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x0a\x20\x20\x20\x20','Japanese','frequency','left','splice','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20&nbsp;&nbsp;\x20Total:\x20<strong\x20style=\x22color:#20c997;\x22>','#080b14','colorText','Sinhala\x20Literature','markAnalysisPopup','\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22mark-chart-wrapper\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<canvas\x20id=\x22markChart\x22></canvas>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22markDetails\x22\x20style=\x22margin-top:20px;color:#8991a6;line-height:1.8;\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','</strong><br>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Part\x201:\x20','sessionDisplay','Sunday','preventDefault','studyTasks','keydown','Buddhist\x20Civilization\x20/\x20Buddhism','#ffffff','918FmVtIo','Literature\x20-\x20English','target','Bio','Languages','textAlign','getElementById','gain','Science\x20for\x20Technology\x20(SFT)','English\x20Language','fullscreenTimerValue','display','Literature\x20-\x20Arabic','top','Your\x20custom\x20timer\x20has\x20finished.','Biology','Pomodoro\x20Completed!\x20🎉','subjects','pie:','\x0a\x20\x20\x20\x20','#131a2a','<strong>Selected\x20Main\x20Subjects:</strong><br>','11px\x20Arial','div','colorBg','total','Entrepreneurship\x20Education','Monday','button','Art','taskList','exponentialRampToValueAtTime','timerFinishPopup','MR_SMILE\x20startup\x20error:','log','border','background','Idle','Dancing\x20-\x20Local','none',';\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin-right:7px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20></span>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','opacity','markActionPopup','Communication\x20&\x20Media\x20Studies','accent','Custom\x20Timer','Total','length','9ayQfOW','French','setupSlide2','393ViBUDs','olBasket2','Sociology','markSubjectList','contains','font','Arts\x20/\x20Fine\x20Arts','tagName','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20style=\x22padding:10px\x200;border-bottom:1px\x20solid\x20#29334d;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<strong\x20style=\x22color:white;\x22>','hello','chartLegend','requestAnimationFrame','3122jLWknw','stringify','SELECT','markFormPopup','#202a40','userSchool','Hindi','Sinhala\x20as\x20a\x20Second\x20Language','\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onclick=\x22completeTask(','Saturday','subjectPopup','subjectOptions','Science','432730wlHIyV','part1','ceil','Drama\x20and\x20Theatre\x20-\x20Tamil','position','markPopup','markSubjectPopup','Electronic\x20Writing\x20and\x20Shorthand','className','currentTime','colorCard','splash','right','Communication\x20and\x20Media\x20Studies','includes','<option\x20value=\x22\x22>Select\x20Subject</option>','1569615AxhADX','Sanskrit','English','readyState','dayPopup','success','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','sin','Study\x20Session','Economics','setupSlide1','--theme-success','Logic\x20and\x20Scientific\x20Method','Great\x20work!\x20Your\x20Pomodoro\x20session\x20is\x20finished.','Home\x20Economics','contextmenu','slice','Music','Music\x20-\x20Karnatic','85SUGLcm','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</small>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20class=\x22delete-task\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onclick=\x22deleteTask(','weekNumber','querySelector','remove','span','dashboard','pieChart','getItem','fullscreenTimerTitle','Geography','#20c997','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20class=\x22task-text\x20','age','\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20class=\x22legend\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:','Political\x20Science','subject','#f59e0b','Islam\x20/\x20Islamic\x20Civilization','\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</span>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<strong\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22color:white;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','strokeStyle','deg','Pali','markChart','arc','.timer-card','bigPieDetails','paperName','Mathematics','\x20marks\x20have\x20been\x20saved\x20for\x20','Physics','Health\x20and\x20Physical\x20Education','--theme-border','Tamil\x20as\x20a\x20Second\x20Language','Please\x20select\x20one\x20subject\x20from\x20each\x20basket.','</h1>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<p\x20style=\x22color:#8991a6;\x22>','11214gthOQD','block','#ffb13b','padStart','Maths','settingsPopup','muted','click-star','Literature\x20-\x20Sinhala','card','6698280PkhyiV','#fb7185','\x20•\x20','max','History','visibility','sessionStatus','#5b5de6','colorBorder','#f5f7ff','fill','Christian\x20Culture\x20/\x20Christianity','olCoreSubjects','studyLevel','--theme-text','querySelectorAll','fillRect','\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<small\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:block;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20color:#697286\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','height','today','#0d1422','textContent','push','hidden','createOscillator','deg\x20','.popup-box','join','weeklyAverage','popupDaySessions','Music\x20-\x20Western','colorInput','helloName'];_0x4eac=function(){return _0x1c48eb;};return _0x4eac();}function showMarkAnalysis(){const _0x5ee797=_0x4c3929;if(!markSubject)return;const _0x28d90e=markData[markSubject]||[],_0x271841=_0x28d90e[_0x5ee797(0x20c)](_0x273a29=>_0x273a29[_0x5ee797(0x20b)]===markType),_0x2b9290=document[_0x5ee797(0x259)](_0x5ee797(0x249)),_0xf19330=_0x2b9290['querySelector'](_0x5ee797(0x1a1));_0xf19330[_0x5ee797(0x1ab)]='\x0a\x20\x20\x20\x20\x20\x20\x20\x20<button\x20class=\x22close-popup\x22\x20onclick=\x22closePopup(\x27markAnalysisPopup\x27)\x22>✕</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<h1>'+markSubject+_0x5ee797(0x17c)+markType+'\x20Marks\x20Analysis</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20'+(_0x271841[_0x5ee797(0x282)]?_0x5ee797(0x24a):_0x5ee797(0x1af)+markType+_0x5ee797(0x176)+markSubject+_0x5ee797(0x1f8))+_0x5ee797(0x266);if(!_0x271841[_0x5ee797(0x282)]){_0x2b9290[_0x5ee797(0x216)]['display']=_0x5ee797(0x1ba);return;}_0x2b9290[_0x5ee797(0x216)]['display']=_0x5ee797(0x1ba),requestAnimationFrame(function(){drawMarkChart(_0x271841);});let _0x35dcd9='';_0x271841[_0x5ee797(0x22e)]((_0x50f6d5,_0x10b874)=>{const _0x31deea=_0x5ee797;_0x35dcd9+=_0x31deea(0x28e)+(_0x10b874+0x1)+'.\x20'+_0x50f6d5[_0x31deea(0x1ac)]+_0x31deea(0x24b)+_0x50f6d5['part1']+'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20&nbsp;&nbsp;\x20Part\x202:\x20'+_0x50f6d5[_0x31deea(0x1b4)]+_0x31deea(0x245)+_0x50f6d5[_0x31deea(0x26c)]+_0x31deea(0x1c1)+_0x50f6d5['date']+_0x31deea(0x2b5);}),document[_0x5ee797(0x259)](_0x5ee797(0x232))['innerHTML']=_0x35dcd9;}function drawMarkChart(_0x3c62c6){const _0x239c0d=_0x4c3929,_0x425121=document['getElementById'](_0x239c0d(0x170));if(!_0x425121)return;const _0x52543e=_0x425121['getContext']('2d'),_0x493ae2=_0x425121['getBoundingClientRect'](),_0x3a7c07=window['devicePixelRatio']||0x1;if(_0x493ae2[_0x239c0d(0x1f5)]<0xa||_0x493ae2['height']<0xa)return;_0x425121['width']=_0x493ae2[_0x239c0d(0x1f5)]*_0x3a7c07,_0x425121[_0x239c0d(0x199)]=_0x493ae2[_0x239c0d(0x199)]*_0x3a7c07,_0x52543e[_0x239c0d(0x237)](_0x3a7c07,0x0,0x0,_0x3a7c07,0x0,0x0);const _0x4d9fd7=_0x493ae2[_0x239c0d(0x1f5)],_0x485b92=_0x493ae2[_0x239c0d(0x199)];_0x52543e['clearRect'](0x0,0x0,_0x4d9fd7,_0x485b92);if(!_0x3c62c6[_0x239c0d(0x282)])return;const _0xa80547=Math[_0x239c0d(0x18a)](0x64,..._0x3c62c6[_0x239c0d(0x210)](_0x333255=>Math[_0x239c0d(0x18a)](_0x333255[_0x239c0d(0x2a0)],_0x333255[_0x239c0d(0x1b4)],_0x333255[_0x239c0d(0x26c)]))),_0x584137=0x37,_0x33d3b9=0x19,_0x532b03=0x19,_0x1676dd=0x30,_0x3aeaed=_0x4d9fd7-_0x584137-_0x33d3b9,_0x258be3=_0x485b92-_0x532b03-_0x1676dd;_0x52543e[_0x239c0d(0x16d)]='#29334d',_0x52543e[_0x239c0d(0x1d3)]=0x1,_0x52543e[_0x239c0d(0x1dd)]='#697286',_0x52543e[_0x239c0d(0x28b)]=_0x239c0d(0x269),_0x52543e['textAlign']=_0x239c0d(0x2ab);for(let _0xc40ba6=0x0;_0xc40ba6<=0x5;_0xc40ba6++){const _0xca3b14=_0x532b03+_0x258be3-_0xc40ba6/0x5*_0x258be3;_0x52543e[_0x239c0d(0x1f3)](),_0x52543e[_0x239c0d(0x221)](_0x584137,_0xca3b14),_0x52543e[_0x239c0d(0x22c)](_0x4d9fd7-_0x33d3b9,_0xca3b14),_0x52543e[_0x239c0d(0x215)](),_0x52543e[_0x239c0d(0x20a)](Math['round'](_0xa80547*_0xc40ba6/0x5),_0x584137-0x8,_0xca3b14+0x4);}const _0x5c5ed8=_0x3e5bd8=>_0x3c62c6[_0x239c0d(0x210)]((_0x8e7fe8,_0x405cac)=>({'x':_0x3c62c6[_0x239c0d(0x282)]===0x1?_0x584137+_0x3aeaed/0x2:_0x584137+_0x405cac/(_0x3c62c6[_0x239c0d(0x282)]-0x1)*_0x3aeaed,'y':_0x532b03+_0x258be3-(Number(_0x8e7fe8[_0x3e5bd8])||0x0)/_0xa80547*_0x258be3})),_0x4c1fb8=[{'key':_0x239c0d(0x2a0),'label':_0x239c0d(0x1b5),'color':_0x239c0d(0x219)},{'key':_0x239c0d(0x1b4),'label':_0x239c0d(0x1ee),'color':_0x239c0d(0x1ad)},{'key':_0x239c0d(0x26c),'label':_0x239c0d(0x281),'color':_0x239c0d(0x164)}];function _0x51b0cd(_0x5297b6,_0x3730e3){const _0x18eee0=_0x239c0d;if(!_0x5297b6[_0x18eee0(0x282)])return;_0x52543e[_0x18eee0(0x1f3)](),_0x52543e['moveTo'](_0x5297b6[0x0]['x'],_0x5297b6[0x0]['y']);if(_0x5297b6[_0x18eee0(0x282)]===0x1)_0x52543e['lineTo'](_0x5297b6[0x0]['x']+0.01,_0x5297b6[0x0]['y']);else for(let _0x4662b3=0x1;_0x4662b3<_0x5297b6[_0x18eee0(0x282)];_0x4662b3++){const _0x37e101=_0x5297b6[_0x4662b3-0x1],_0x719070=_0x5297b6[_0x4662b3],_0x307529=(_0x37e101['x']+_0x719070['x'])/0x2;_0x52543e['bezierCurveTo'](_0x307529,_0x37e101['y'],_0x307529,_0x719070['y'],_0x719070['x'],_0x719070['y']);}_0x52543e[_0x18eee0(0x16d)]=_0x3730e3,_0x52543e[_0x18eee0(0x1d3)]=0x3,_0x52543e[_0x18eee0(0x215)](),_0x5297b6['forEach'](_0x4c2e97=>{const _0xa8b2dc=_0x18eee0;_0x52543e['beginPath'](),_0x52543e[_0xa8b2dc(0x171)](_0x4c2e97['x'],_0x4c2e97['y'],0x5,0x0,Math['PI']*0x2),_0x52543e[_0xa8b2dc(0x1dd)]=_0x3730e3,_0x52543e[_0xa8b2dc(0x191)](),_0x52543e[_0xa8b2dc(0x16d)]=_0xa8b2dc(0x252),_0x52543e[_0xa8b2dc(0x1d3)]=0x2,_0x52543e['stroke']();});}_0x4c1fb8[_0x239c0d(0x22e)](_0x461feb=>_0x51b0cd(_0x5c5ed8(_0x461feb['key']),_0x461feb['color'])),_0x52543e[_0x239c0d(0x1dd)]=_0x239c0d(0x20d),_0x52543e[_0x239c0d(0x28b)]='10px\x20Arial',_0x52543e[_0x239c0d(0x258)]=_0x239c0d(0x1c3),_0x3c62c6[_0x239c0d(0x22e)]((_0x149eba,_0x20d144)=>{const _0x1dedd1=_0x239c0d,_0x2060e8=_0x3c62c6[_0x1dedd1(0x282)]===0x1?_0x584137+_0x3aeaed/0x2:_0x584137+_0x20d144/(_0x3c62c6[_0x1dedd1(0x282)]-0x1)*_0x3aeaed;_0x52543e[_0x1dedd1(0x20a)](_0x149eba[_0x1dedd1(0x1ac)][_0x1dedd1(0x282)]>0xe?_0x149eba['paper'][_0x1dedd1(0x2bf)](0x0,0xe)+'…':_0x149eba['paper'],_0x2060e8,_0x485b92-0x14);});let _0x1dcd57=_0x584137;_0x52543e[_0x239c0d(0x28b)]=_0x239c0d(0x269),_0x4c1fb8[_0x239c0d(0x22e)](_0x51b94d=>{const _0x226613=_0x239c0d;_0x52543e[_0x226613(0x1dd)]=_0x51b94d[_0x226613(0x1e3)],_0x52543e[_0x226613(0x197)](_0x1dcd57,0x5,0xa,0xa),_0x52543e[_0x226613(0x1dd)]=_0x226613(0x20d),_0x52543e[_0x226613(0x20a)](_0x51b94d[_0x226613(0x23c)],_0x1dcd57+0x2d,0xe),_0x1dcd57+=0x5a;});}const defaultTheme={'bg':_0x4c3929(0x246),'card':_0x4c3929(0x267),'input':_0x4c3929(0x19b),'border':_0x4c3929(0x1e6),'text':_0x4c3929(0x190),'muted':_0x4c3929(0x20d),'accent':_0x4c3929(0x18e),'success':_0x4c3929(0x164)};function getTheme(){const _0x4f1e25=_0x4c3929;return JSON['parse'](localStorage[_0x4f1e25(0x161)](_0x4f1e25(0x1da)))||{...defaultTheme};}function applyTheme(_0x4dd83d){const _0x292a32=_0x4c3929,_0x3fd721=document[_0x292a32(0x1f2)];_0x3fd721[_0x292a32(0x216)][_0x292a32(0x208)](_0x292a32(0x207),_0x4dd83d['bg']),_0x3fd721[_0x292a32(0x216)]['setProperty']('--theme-card',_0x4dd83d[_0x292a32(0x186)]),_0x3fd721[_0x292a32(0x216)][_0x292a32(0x208)](_0x292a32(0x23a),_0x4dd83d[_0x292a32(0x22f)]),_0x3fd721[_0x292a32(0x216)]['setProperty'](_0x292a32(0x179),_0x4dd83d[_0x292a32(0x276)]),_0x3fd721['style']['setProperty'](_0x292a32(0x195),_0x4dd83d[_0x292a32(0x1ea)]),_0x3fd721[_0x292a32(0x216)]['setProperty']('--theme-muted',_0x4dd83d[_0x292a32(0x183)]),_0x3fd721[_0x292a32(0x216)]['setProperty'](_0x292a32(0x20f),_0x4dd83d[_0x292a32(0x27f)]),_0x3fd721[_0x292a32(0x216)][_0x292a32(0x208)](_0x292a32(0x2ba),_0x4dd83d[_0x292a32(0x2b4)]);}function openSettings(){const _0x68b3b0=_0x4c3929,_0x548b44=getTheme();document[_0x68b3b0(0x259)](_0x68b3b0(0x26b))[_0x68b3b0(0x231)]=_0x548b44['bg'],document[_0x68b3b0(0x259)](_0x68b3b0(0x2a9))[_0x68b3b0(0x231)]=_0x548b44[_0x68b3b0(0x186)],document['getElementById'](_0x68b3b0(0x1a6))[_0x68b3b0(0x231)]=_0x548b44[_0x68b3b0(0x22f)],document['getElementById'](_0x68b3b0(0x18f))[_0x68b3b0(0x231)]=_0x548b44['border'],document['getElementById'](_0x68b3b0(0x247))[_0x68b3b0(0x231)]=_0x548b44['text'],document[_0x68b3b0(0x259)]('colorMuted')[_0x68b3b0(0x231)]=_0x548b44['muted'],document[_0x68b3b0(0x259)](_0x68b3b0(0x1b3))[_0x68b3b0(0x231)]=_0x548b44['accent'],document[_0x68b3b0(0x259)](_0x68b3b0(0x223))[_0x68b3b0(0x231)]=_0x548b44['success'],document['getElementById']('settingsPopup')[_0x68b3b0(0x216)][_0x68b3b0(0x25e)]='flex';}function closeSettings(){const _0x20f7a6=_0x4c3929;document[_0x20f7a6(0x259)](_0x20f7a6(0x182))[_0x20f7a6(0x216)][_0x20f7a6(0x25e)]=_0x20f7a6(0x27a);}function saveTheme(){const _0x3b8e37=_0x4c3929,_0x3eacae={'bg':document[_0x3b8e37(0x259)](_0x3b8e37(0x26b))[_0x3b8e37(0x231)],'card':document[_0x3b8e37(0x259)](_0x3b8e37(0x2a9))[_0x3b8e37(0x231)],'input':document['getElementById'](_0x3b8e37(0x1a6))[_0x3b8e37(0x231)],'border':document['getElementById'](_0x3b8e37(0x18f))['value'],'text':document['getElementById']('colorText')['value'],'muted':document['getElementById']('colorMuted')[_0x3b8e37(0x231)],'accent':document['getElementById'](_0x3b8e37(0x1b3))[_0x3b8e37(0x231)],'success':document[_0x3b8e37(0x259)]('colorSuccess')[_0x3b8e37(0x231)]};localStorage[_0x3b8e37(0x1ff)](_0x3b8e37(0x1da),JSON[_0x3b8e37(0x293)](_0x3eacae)),applyTheme(_0x3eacae),closeSettings();}function resetTheme(){const _0x4d0e60=_0x4c3929;localStorage[_0x4d0e60(0x1b9)](_0x4d0e60(0x1da)),applyTheme({...defaultTheme}),openSettings();}applyTheme(getTheme()),window[_0x4c3929(0x1c2)](_0x4c3929(0x213),function(){const _0x2a55cc=_0x4c3929,_0x48d59=document['getElementById'](_0x2a55cc(0x249));if(_0x48d59&&getComputedStyle(_0x48d59)['display']!==_0x2a55cc(0x27a)&&markSubject){const _0x37a3ca=(markData[markSubject]||[])[_0x2a55cc(0x20c)](_0x9f25a4=>_0x9f25a4['type']===markType);if(_0x37a3ca['length'])requestAnimationFrame(()=>drawMarkChart(_0x37a3ca));}});const savedName=localStorage['getItem'](_0x4c3929(0x1c5));savedName&&(document['getElementById'](_0x4c3929(0x22b))['textContent']=savedName);document[_0x4c3929(0x1c2)]('click',function(_0x4e9331){const _0x9a582a=_0x4c3929;if(_0x4e9331[_0x9a582a(0x255)][_0x9a582a(0x28d)]===_0x9a582a(0x228)||_0x4e9331[_0x9a582a(0x255)][_0x9a582a(0x28d)]===_0x9a582a(0x294)||_0x4e9331[_0x9a582a(0x255)][_0x9a582a(0x28d)]==='OPTION')return;const _0x5a735c=0xa;for(let _0x482be5=0x0;_0x482be5<_0x5a735c;_0x482be5++){const _0x460a54=document[_0x9a582a(0x1e2)](_0x9a582a(0x2c7));_0x460a54[_0x9a582a(0x2a7)]=_0x9a582a(0x184),_0x460a54[_0x9a582a(0x19c)]='✦',_0x460a54[_0x9a582a(0x216)][_0x9a582a(0x243)]=_0x4e9331[_0x9a582a(0x1f0)]+'px',_0x460a54['style'][_0x9a582a(0x260)]=_0x4e9331['clientY']+'px';const _0x45d79e=Math['random']()*Math['PI']*0x2,_0x1d34a0=0x1e+Math[_0x9a582a(0x23f)]()*0x32,_0x2d3760=Math[_0x9a582a(0x21f)](_0x45d79e)*_0x1d34a0,_0x552c7a=Math[_0x9a582a(0x2b6)](_0x45d79e)*_0x1d34a0;_0x460a54['style'][_0x9a582a(0x208)](_0x9a582a(0x23e),_0x2d3760+'px'),_0x460a54['style']['setProperty']('--y',_0x552c7a+'px'),_0x460a54[_0x9a582a(0x216)][_0x9a582a(0x1d6)]=Math[_0x9a582a(0x23f)]()*0x64+'ms',document['body'][_0x9a582a(0x1b8)](_0x460a54),setTimeout(()=>{const _0x418bb1=_0x9a582a;_0x460a54[_0x418bb1(0x2c6)]();},0x320);}});function closeMobilePanels(){const _0x3a4d51=_0x4c3929,_0x18f929=document[_0x3a4d51(0x259)](_0x3a4d51(0x15f));if(!_0x18f929)return;_0x18f929[_0x3a4d51(0x1b0)]['remove'](_0x3a4d51(0x224),_0x3a4d51(0x229));}function toggleMobilePanel(_0x6535cb){const _0x5c1ba8=_0x4c3929,_0x505fe5=document[_0x5c1ba8(0x259)](_0x5c1ba8(0x15f));if(!_0x505fe5)return;if(_0x6535cb===_0x5c1ba8(0x243)){const _0x183772=!_0x505fe5['classList']['contains'](_0x5c1ba8(0x224));_0x505fe5[_0x5c1ba8(0x1b0)][_0x5c1ba8(0x2c6)](_0x5c1ba8(0x229)),_0x505fe5[_0x5c1ba8(0x1b0)]['toggle'](_0x5c1ba8(0x224),_0x183772);}else{const _0x4b8fca=!_0x505fe5['classList'][_0x5c1ba8(0x28a)](_0x5c1ba8(0x229));_0x505fe5[_0x5c1ba8(0x1b0)][_0x5c1ba8(0x2c6)](_0x5c1ba8(0x224)),_0x505fe5[_0x5c1ba8(0x1b0)][_0x5c1ba8(0x1b7)]('mobile-right-open',_0x4b8fca);if(_0x4b8fca)try{updatePieChart();}catch(_0x4727e9){}}}document[_0x4c3929(0x1c2)](_0x4c3929(0x250),function(_0x1d4726){const _0x5694b0=_0x4c3929;if(_0x1d4726[_0x5694b0(0x1b1)]==='Escape')closeMobilePanels();}),updatePomodoro(),updateCustomDisplay(),updateSessionDisplay();
 </script>
 
 </body>
