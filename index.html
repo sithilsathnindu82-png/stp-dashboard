@@ -2563,6 +2563,28 @@ document.addEventListener('touchmove', function() {
     clearTimeout(window.longPressTimer);
 });
 
+// Offline PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        const swCode = `
+            const CACHE_NAME = 'stp-dashboard-v1';
+            self.addEventListener('install', e => {
+                e.waitUntil(
+                    caches.open(CACHE_NAME).then(cache => cache.addAll(['./']))
+                );
+            });
+            self.addEventListener('fetch', e => {
+                e.respondWith(
+                    caches.match(e.request).then(response => response || fetch(e.request))
+                );
+            });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl);
+    });
+}
+  
 </script>
 
 </body>
