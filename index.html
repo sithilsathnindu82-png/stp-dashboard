@@ -6,43 +6,6 @@
 <title>MR_SMILE</title>
 
 <style>
-  /* Popup එක Screen එකට Fit කිරීම */
-  [class*="popup"], [class*="modal"] {
-    max-height: 85vh !important;
-    max-width: 90vw !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 15px !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-  }
-
-  /* Pie Chart එක Oversize වීම වැළැක්වීම */
-  [class*="popup"] svg, 
-  [class*="modal"] svg, 
-  [class*="popup"] canvas, 
-  [class*="modal"] canvas,
-  [class*="chart"], 
-  [id*="chart"] {
-    max-height: 32vh !important;
-    max-width: 100% !important;
-    width: auto !important;
-    height: auto !important;
-    margin: 0 auto !important;
-  }
-
-  /* Title එකේ ඉඩ අඩු කිරීම */
-  [class*="popup"] h1, [class*="popup"] h2, [class*="popup"] h3,
-  [class*="modal"] h1, [class*="modal"] h2, [class*="modal"] h3 {
-    margin: 5px 0 !important;
-    font-size: 1.2rem !important;
-  }
-</style>
-
-
-<style>
 
 html, body {
   width: 100vw;
@@ -717,8 +680,8 @@ body{
     border-color:transparent;
 }
 
-  /* =========================
-   PIE (UPDATED FOR FIX)
+/* =========================
+   PIE
 ========================= */
 
 .distribution-card{
@@ -733,26 +696,24 @@ body{
 }
 
 #pieChart{
-    width: 100%;
-    max-width: 260px; /* Chart එක Oversize වීම වැළැක්වීමට */
-    aspect-ratio: 1 / 1;
-    height: auto;
-    border-radius: 50%;
-    margin: 15px auto;
-    border: 4px solid #0b101c;
-    flex-shrink: 0;
-    box-sizing: border-box;
+    width:330px;
+    height:330px;
+    max-width:90%;
+    max-height:90%;
+    border-radius:50%;
+    margin:20px auto;
+    border:4px solid #0b101c;
+    flex-shrink:0;
 }
 
 .chart-legend{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:10px 20px;
-    margin-top:15px;
+    margin-top:20px;
     color:#8991a6;
     font-size:13px;
 }
-
 
 .legend{
     display:inline-block;
@@ -1480,23 +1441,28 @@ body{
     .mobile-quick-controls{
         z-index:6200;
     }
-#pieChart {
-        max-width: 200px;
-        height: auto;
-    }
-  
 }
 
 @media (min-width:701px){
     .mobile-quick-controls,.mobile-panel-backdrop{display:none!important;}
 }
 
-.timer-finish-popup {
-    display: none !important;
+/* Pie Chart Fix */
+#pieChart {
+    width: 100% !important;
+    max-width: 240px !important;
+    aspect-ratio: 1 / 1 !important;
+    height: auto !important;
+    border-radius: 50% !important;
+    margin: 15px auto !important;
+    border: 4px solid #0b101c !important;
+    box-sizing: border-box !important;
 }
 
-.timer-finish-popup.active {
-    display: flex !important;
+@media (max-width:700px) {
+    #pieChart {
+        max-width: 200px !important;
+    }
 }
   
 </style>
